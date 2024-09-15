@@ -1,0 +1,31 @@
+pyspark==3.5.2
+numpy==2.1.1
+pillow==10.4.0
+pyparsing==3.1.4
+cycler==0.12.1
+kiwisolver==1.4.7
+pandas==2.2.2
+matplotlib==3.9.0
+
+# Dependencies for nbconvert
+beautifulsoup4
+bleach!=5.0.0
+defusedxml
+jupyterlab-pygments
+nbclient>=0.5.0
+pandocfilters>=1.4.1
+
+# Dependencies for Jupyter
+nbclassic==1.0.0
+jupyter-server>=1.8
+prometheus-client
+Send2Trash>=1.8.0
+terminado>=0.8.3
+nbformat>=4.2.0
+
+bayesian-optimization
+hyperopt
+lightgbm
+scikit-learn
+pycaret
+sparkxgb
