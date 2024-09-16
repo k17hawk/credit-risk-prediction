@@ -16,10 +16,18 @@ DATA_INGESTION_FEATURE_STORE_DIR = "feature_store"
 
 #DataValidation constants
 DATA_VALIDATION_DIR = "data_validation"
-DATA_VALIDATION_FILE_NAME = "car_price"
+DATA_VALIDATION_FILE_NAME = "credit_risk"
 DATA_VALIDATION_ACCEPTED_DATA_DIR = "accepted_data"
 DATA_VALIDATION_REJECTED_DATA_DIR = "rejected_data"
 
+
+##data transformation constants
+DATA_TRANSFORMATION_DIR = "data_transformation"
+DATA_TRANSFORMATION_PIPELINE_DIR = "transformed_pipeline"
+DATA_TRANSFORMATION_TRAIN_DIR = "train"
+DATA_TRANSFORMATION_FILE_NAME = "credit_risk"
+DATA_TRANSFORMATION_TEST_DIR = "test"
+DATA_TRANSFORMATION_TEST_SIZE = 0.2
 
 @dataclass
 class TrainingPipelineConfig:
@@ -72,3 +80,28 @@ class DataValidationConfig:
 
         except Exception as e:
             raise CreditRiskException(e,sys)
+        
+class DataTransformationConfig:
+    def __init__(self,training_pipeline_config:TrainingPipelineConfig) -> None:
+        try:
+            #artifact/TIMESTAMP/data_transformation
+            data_transformation_dir = os.path.join(training_pipeline_config.artifact_dir,DATA_TRANSFORMATION_DIR)
+            
+            #artifact/TIMESTAMP/data_transformation/train
+            self.transformation_train_dir = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TRAIN_DIR)
+
+            #artifact/TIMESTAMP/data_transformation/test
+            self.transformation_test_dir = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_TEST_DIR)
+
+            #artifact/TIMESTAMP/data_transformation/transformed_pipeline
+            self.export_pipeline_dir = os.path.join(data_transformation_dir,DATA_TRANSFORMATION_PIPELINE_DIR)
+            
+            #file_name = credit_risk
+            self.file_name = DATA_TRANSFORMATION_FILE_NAME
+
+            #test_size = 0.2 
+            self.test_size = DATA_TRANSFORMATION_TEST_SIZE
+
+
+        except Exception as e:
+                raise CreditRiskException(e,sys)
