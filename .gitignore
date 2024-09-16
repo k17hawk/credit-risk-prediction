@@ -166,3 +166,4 @@ notebook/cat*
 notebook/sca*
 notebook/feature_engineering.ipynb
 *.pkl
+artifact/
