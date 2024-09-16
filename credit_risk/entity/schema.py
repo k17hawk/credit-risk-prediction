@@ -27,6 +27,9 @@ class CreditRiskDataSchema:
         self.col_loan_to_income_ratio = 'loan_to_income_ratio'
         self.col_loan_to_emp_length_ratio = 'loan_to_emp_length_ratio'
         self.col_int_rate_to_loan_amt_ratio = 'int_rate_to_loan_amt_ratio'
+        self.col_income_group = 'income_group'
+        self.col_age_group = 'age_group'
+        self.col_loan_amount_group = 'loan_amount_group'
     
 
 
@@ -50,7 +53,10 @@ class CreditRiskDataSchema:
                 StructField(self.col_loan_to_income_ratio,StringType()),
                 StructField(self.col_loan_to_emp_length_ratio,StringType()),
                 StructField(self.col_int_rate_to_loan_amt_ratio,StringType()),
-                
+                StructField(self.col_income_group,StringType()),
+                StructField(self.col_age_group,StringType()),
+                StructField(self.col_loan_amount_group,StringType())
+            
 
             ])
             return schema
@@ -61,12 +67,20 @@ class CreditRiskDataSchema:
     def target_column(self) -> str:
         return self.col_loan_status
     
+
     @property
     def derieved_column(self) -> List[str]:
         features = [
+             self.col_loan_to_income_ratio,
+             self.col_loan_to_emp_length_ratio,
+             self.col_int_rate_to_loan_amt_ratio,
+             self.col_income_group,
+             self.col_age_group,
+             self.col_loan_amount_group
 
         ]
         return features
+
 
     @property
     def categorical_features(self) -> List[str]:
@@ -95,11 +109,38 @@ class CreditRiskDataSchema:
         ]
         return features
 
+    # @property
+    # def oneHot_encoding(self)-> List[str]:
+    #     features = [
+    #            f"enc_{col}" for col in self.categorical_features
+    #     ]
+    #     return features
+    
+                
     @property
-    def oneHot_encoding(self)-> List[str]:
+    def one_hot_encoding_features_derived(self) -> List[str]:
         features = [
-               f"enc_{col}" for col in self.categorical_features
+            self.col_income_group,
+            self.col_age_group,
+            self.col_income_group,
+            self.col_loan_amount_group
         ]
+        return features
+    
+    @property
+    def one_hot_encoding_features(self) -> List[str]:
+        features = [
+            self.col_cb_person_default_on_file,
+            self.col_person_home_ownership,
+            self.col_loan_intent,
+            self.col_loan_grade,
+
+        ]
+        return features
+    
+    @property
+    def required_columns(self) -> List[str]:
+        features = [self.target_column] + self.one_hot_encoding_features + self.numerical_columns
         return features
     
 

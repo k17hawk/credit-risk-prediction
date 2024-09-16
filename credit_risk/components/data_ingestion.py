@@ -10,6 +10,7 @@ import json
 import re
 import time
 from credit_risk.entity import DataIngestionArtifact
+from credit_risk.config.spark_manager import spark_session
 
 Download_url = namedtuple('downloadURL',['url',
                                          'file_path',
@@ -81,6 +82,36 @@ class DataIngestion:
 
         except Exception as e:
             raise CreditRiskException(e, sys)
+    
+    def convert_files_to_parquet(self) -> str:
+        """
+        downloaded files will be converted into parquet file
+        =======================================================================================
+        returns output_file_path
+        """
+        try:
+            csv_data_dir = self.data_ingestion_config.download_dir
+            data_dir = self.data_ingestion_config.feature_store_dir
+            output_file_name = self.data_ingestion_config.file_name
+            os.makedirs(data_dir, exist_ok=True)
+            file_path = os.path.join(data_dir, f"{output_file_name}")
+            logger.info(f"Parquet file will be created at: {file_path}")
+            if not os.path.exists(csv_data_dir):
+                return file_path
+            for file_name in os.listdir(csv_data_dir):
+                csv_file_path = os.path.join(csv_data_dir, file_name)
+                logger.debug(f"Converting {csv_file_path} into parquet format at {file_path}")
+                
+                df = spark_session.read.csv(csv_file_path, header=True, multiLine=True)
+                
+                if df.count() > 0:
+                    df.write.mode('append').parquet(file_path)
+
+            return file_path
+        except Exception as e:
+            raise CreditRiskException(e, sys)
+
+
 
 
         
@@ -94,9 +125,16 @@ class DataIngestion:
                 n_retry=self.n_retry
             )
 
+
             self.download_files(download_url)
             feature_store_file_path = os.path.join(self.data_ingestion_config.feature_store_dir,
                                                    self.data_ingestion_config.file_name)
+            
+            if os.path.exists(self.data_ingestion_config.download_dir):
+                logger.info(f"Converting csv  into parquet file")
+                file_path = self.convert_files_to_parquet()
+        
+
 
             
             artifact =  DataIngestionArtifact(
@@ -104,6 +142,7 @@ class DataIngestion:
                 download_dir=self.data_ingestion_config.download_dir
             )
             logger.info(f"Data ingestion artifact: {artifact}")
+            logger.info(f"{'>>' * 20}Data Ingestion completed.{'<<' * 20}")
             return artifact
         
         except Exception as e:

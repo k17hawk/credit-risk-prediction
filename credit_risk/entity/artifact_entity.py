@@ -5,3 +5,8 @@ from datetime import datetime
 class DataIngestionArtifact:
     download_dir:str
     feature_store_file_path:str
+
+@dataclass
+class DataValidationArtifact:
+    accepted_file_path:str
+    rejected_dir:str
