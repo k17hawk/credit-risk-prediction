@@ -78,9 +78,6 @@ class DataValidation():
         try:
             logger.info(f"Initiating data preprocessing.")
             dataframe: DataFrame = self.read_data()
-            logger.info(dataframe.show())
-
-            # validation to ensure that all require column available
             self.is_required_columns_exist(dataframe=dataframe)
             logger.info("Saving preprocessed data.")
             print(f"Row: [{dataframe.count()}] Column: [{len(dataframe.columns)}]")

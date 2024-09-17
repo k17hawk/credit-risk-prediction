@@ -96,6 +96,8 @@ class CreditRiskDataSchema:
         ]
         return features
     
+
+    
     @property
     def numerical_columns(self) -> List[str]:
         features = [
@@ -109,20 +111,12 @@ class CreditRiskDataSchema:
         ]
         return features
 
-    # @property
-    # def oneHot_encoding(self)-> List[str]:
-    #     features = [
-    #            f"enc_{col}" for col in self.categorical_features
-    #     ]
-    #     return features
-    
-                
+
     @property
     def one_hot_encoding_features_derived(self) -> List[str]:
         features = [
             self.col_income_group,
             self.col_age_group,
-            self.col_income_group,
             self.col_loan_amount_group
         ]
         return features
@@ -137,10 +131,28 @@ class CreditRiskDataSchema:
 
         ]
         return features
-    
+
+
     @property
     def required_columns(self) -> List[str]:
         features = [self.target_column] + self.one_hot_encoding_features + self.numerical_columns
+        return features
+    
+    @property
+    def required_oneHot_features(self) -> List[str]:
+        features  =self.one_hot_encoding_features + self.one_hot_encoding_features_derived
+        return features
+    
+    @property
+    def required_scaling_columns(self) -> List[str]:
+        features  =[self.col_person_age,
+                    self.col_person_income,
+                    self.col_person_emp_length,
+                    self.col_loan_amnt,
+                    self.col_loan_int_rate,
+                    self.col_cb_person_cred_hist_length,
+                    self.col_loan_to_emp_length_ratio,
+                    self.col_int_rate_to_loan_amt_ratio]
         return features
     
 
