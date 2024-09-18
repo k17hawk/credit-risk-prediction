@@ -29,3 +29,5 @@ lightgbm
 scikit-learn
 pycaret
 sparkxgb
+PyArrow
+findspark

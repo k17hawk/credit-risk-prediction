@@ -167,3 +167,4 @@ notebook/sca*
 notebook/feature_engineering.ipynb
 *.pkl
 artifact/
+notebook/jar_file

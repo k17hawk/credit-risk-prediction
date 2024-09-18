@@ -1,13 +1,14 @@
 
 from credit_risk.entity import DataIngestionConfig,DataIngestionArtifact
-from credit_risk.entity.config_entity import DataValidationConfig
+from credit_risk.entity.config_entity import DataValidationConfig,ModelTrainerConfig
 from credit_risk.components.data_validation import DataValidation
 from credit_risk.entity.artifact_entity import DataValidationArtifact
 from credit_risk.entity.config_entity import  TrainingPipelineConfig,DataTransformationConfig
 from credit_risk.exception import CreditRiskException
 from credit_risk.components.data_ingestion import DataIngestion
 from credit_risk.components.data_transformation import DataTransformation
-from credit_risk.entity.artifact_entity import DataTransformationArtifact
+from credit_risk.components.model_trainer import ModelTrainer
+from credit_risk.entity.artifact_entity import DataTransformationArtifact,ModelTrainerArtifact
 import os
 import os,sys
 
@@ -50,6 +51,18 @@ class TrainingPipeline:
             return data_transformation_artifact
         except Exception as e:
             raise CreditRiskException(e, sys)
+    
+    def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
+        try:
+            model_trainer_config = ModelTrainerConfig(training_pipeline_config=self.training_pipeline_config)
+            model_trainer = ModelTrainer(data_transformation_artifact=data_transformation_artifact,
+                                         model_trainer_config=model_trainer_config
+                                         )
+            model_trainer_artifact = model_trainer.initiate_model_training()
+            return model_trainer_artifact
+        except Exception as e:
+            raise CreditRiskException(e, sys)
+
         
 
     
@@ -58,5 +71,6 @@ class TrainingPipeline:
             data_ingestion_artifact = self.start_data_ingestion()
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(data_validation_artifact=data_validation_artifact)
+            model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
         except Exception as e:
             raise CreditRiskException(e, sys)

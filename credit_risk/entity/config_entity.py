@@ -29,6 +29,24 @@ DATA_TRANSFORMATION_FILE_NAME = "credit_risk"
 DATA_TRANSFORMATION_TEST_DIR = "test"
 DATA_TRANSFORMATION_TEST_SIZE = 0.2
 
+#model trainer
+MODEL_TRAINER_BASE_ACCURACY = 0.7
+MODEL_TRAINER_DIR = "model_trainer"
+MODEL_TRAINER_TRAINED_MODEL_DIR = "trained_model"
+MODEL_TRAINER_MODEL_NAME = "creditRisk_estimator"
+MODEL_TRAINER_LABEL_INDEXER_DIR = "label_indexer"
+MODEL_TRAINER_MODEL_METRIC_NAMES = ['f1',
+                                    "weightedPrecision",
+                                    "weightedRecall",
+                                    "weightedTruePositiveRate",
+                                    "weightedFalsePositiveRate",
+                                    "weightedFMeasure",
+                                    "truePositiveRateByLabel",
+                                    "falsePositiveRateByLabel",
+                                    "precisionByLabel",
+                                    "recallByLabel",
+                                    "fMeasureByLabel"]
+
 @dataclass
 class TrainingPipelineConfig:
     pipeline_name:str = 'artifact'
@@ -105,3 +123,29 @@ class DataTransformationConfig:
 
         except Exception as e:
                 raise CreditRiskException(e,sys)
+ 
+class ModelTrainerConfig:
+
+    def __init__(self,training_pipeline_config:TrainingPipelineConfig) -> None:
+        try:
+            #artifact/TIMESTAMP/model_trainer
+            model_trainer_dir = os.path.join(training_pipeline_config.artifact_dir,
+                                                MODEL_TRAINER_DIR)
+                                                
+            #artifact/TIMESTAMP/model_trainer/creditRisk_estimator
+            self.trained_model_file_path = os.path.join(model_trainer_dir, 
+            MODEL_TRAINER_TRAINED_MODEL_DIR, MODEL_TRAINER_MODEL_NAME)
+            
+            #artifact/TIMESTAMP/model_trainer/label_indexer
+            self.label_indexer_model_dir = os.path.join(
+                model_trainer_dir, MODEL_TRAINER_LABEL_INDEXER_DIR
+            )
+            
+            
+            #base_accuracy = 0.7
+            self.base_accuracy = MODEL_TRAINER_BASE_ACCURACY
+            
+            self.metric_list = MODEL_TRAINER_MODEL_METRIC_NAMES
+        except Exception as e:
+                raise CreditRiskException(e,sys)
+

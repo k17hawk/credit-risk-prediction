@@ -202,8 +202,24 @@ class DataTransformation:
             # duplicates = [col for col in transformed_trained_dataframe.columns if transformed_trained_dataframe.columns.count(col) > 1]
             #replacing the columns
             transformed_trained_dataframe = transformed_trained_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_trained_dataframe.columns])
-            
             transformed_test_dataframe = transformed_test_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_test_dataframe.columns])
+
+            # Identify string columns and convert them to float
+            string_columns = [c for c, dtype in transformed_trained_dataframe.dtypes if dtype == 'string']
+
+            for col_name in string_columns:
+                transformed_trained_dataframe = transformed_trained_dataframe.withColumn(col_name, col(col_name).cast("float"))
+                transformed_test_dataframe = transformed_test_dataframe.withColumn(col_name, col(col_name).cast("float"))
+
+            # Selecting features
+            features = [col for col in transformed_trained_dataframe.columns if col != self.schema.target_column]
+
+            # Assembling features
+            assembler = VectorAssembler(inputCols=features, outputCol="features")
+            transformed_trained_dataframe = assembler.transform(transformed_trained_dataframe)
+            transformed_test_dataframe = assembler.transform(transformed_test_dataframe)
+            
+	    
 
             export_pipeline_file_path = self.data_tf_config.export_pipeline_dir
             os.makedirs(export_pipeline_file_path,exist_ok=True)

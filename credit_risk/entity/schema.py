@@ -154,6 +154,24 @@ class CreditRiskDataSchema:
                     self.col_loan_to_emp_length_ratio,
                     self.col_int_rate_to_loan_amt_ratio]
         return features
+
+
+
+    @property
+    def target_indexed_label(self) -> str:
+        return f"indexed_{self.target_column}"
+
+    @property
+    def prediction_column_name(self) -> str:
+        return "prediction"
+
+    @property
+    def prediction_label_column_name(self) -> str:
+        return f"{self.prediction_column_name}_{self.target_column}"
+    
+    @property
+    def scaled_vector_input_features(self) -> str:
+        return "scaled_input_features"
     
 
 
