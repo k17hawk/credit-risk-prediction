@@ -31,3 +31,4 @@ pycaret
 sparkxgb
 PyArrow
 findspark
+dotenv

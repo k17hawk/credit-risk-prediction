@@ -23,6 +23,7 @@ class ModelTrainer:
                  model_trainer_config: ModelTrainerConfig,
                  schema=CreditRiskDataSchema()
                  ):
+        logger.info(f"{'>>' * 20}Starting Model Training.{'<<' * 20}")
         self.data_transformation_artifact = data_transformation_artifact
         self.model_trainer_config = model_trainer_config
         self.schema = schema
@@ -148,6 +149,7 @@ class ModelTrainer:
                                                           model_trainer_test_metric_artifact=test_metric_artifact)
 
             logger.info(f"Model trainer artifact: {model_trainer_artifact}")
+            logger.info(f"{'>>' * 20}Model Training End {'<<' * 20}")
 
             return model_trainer_artifact
 

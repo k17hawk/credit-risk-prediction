@@ -47,6 +47,13 @@ MODEL_TRAINER_MODEL_METRIC_NAMES = ['f1',
                                     "recallByLabel",
                                     "fMeasureByLabel"]
 
+#model evaluation
+MODEL_EVALUATION_DIR = "model_evaluation"
+MODEL_EVALUATION_REPORT_DIR = "report"
+MODEL_EVALUATION_REPORT_FILE_NAME = "evaluation_report"
+MODEL_EVALUATION_THRESHOLD_VALUE = 0.002
+MODEL_EVALUATION_METRIC_NAMES = ['f1',]
+
 @dataclass
 class TrainingPipelineConfig:
     pipeline_name:str = 'artifact'
@@ -149,3 +156,16 @@ class ModelTrainerConfig:
         except Exception as e:
                 raise CreditRiskException(e,sys)
 
+
+class ModelEvaluationConfig:
+
+
+    def __init__(self, training_pipeline_config:TrainingPipelineConfig) -> None:
+
+        #artifact/TIMESTAMP/model_evaluation/
+        self.model_evaluation_dir = os.path.join(training_pipeline_config.artifact_dir,
+                                                MODEL_EVALUATION_DIR)
+        #threshold = 0.02
+        self.threshold=MODEL_EVALUATION_THRESHOLD_VALUE
+        
+        self.metric_list=MODEL_EVALUATION_METRIC_NAMES
