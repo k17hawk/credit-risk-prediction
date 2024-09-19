@@ -1,6 +1,6 @@
 
 from credit_risk.entity import DataIngestionConfig,DataIngestionArtifact
-from credit_risk.entity.config_entity import DataValidationConfig,ModelTrainerConfig,ModelEvaluationConfig
+from credit_risk.entity.config_entity import DataValidationConfig,ModelTrainerConfig,ModelEvaluationConfig,ModelPusherConfig
 from credit_risk.components.data_validation import DataValidation
 from credit_risk.entity.artifact_entity import DataValidationArtifact
 from credit_risk.entity.config_entity import  TrainingPipelineConfig,DataTransformationConfig
@@ -9,7 +9,8 @@ from credit_risk.components.data_ingestion import DataIngestion
 from credit_risk.components.data_transformation import DataTransformation
 from credit_risk.components.model_evaluation import ModelEvaluation
 from credit_risk.components.model_trainer import ModelTrainer
-from credit_risk.entity.artifact_entity import DataTransformationArtifact,ModelTrainerArtifact,ModelEvaluationArtifact
+from credit_risk.components.model_pusher import ModelPusher
+from credit_risk.entity.artifact_entity import DataTransformationArtifact,ModelTrainerArtifact,ModelEvaluationArtifact,ModelPusherArtifact
 import os
 import os,sys
 
@@ -74,6 +75,17 @@ class TrainingPipeline:
             return model_eval.initiate_model_evaluation()
         except Exception as e:
             raise CreditRiskException(e, sys)
+    
+    def start_model_pusher(self, model_trainer_artifact: ModelTrainerArtifact):
+        try:
+
+            model_pusher_config = ModelPusherConfig(training_pipeline_config=self.training_pipeline_config)
+            model_pusher = ModelPusher(model_trainer_artifact=model_trainer_artifact,
+                                       model_pusher_config=model_pusher_config
+                                       )
+            return model_pusher.initiate_model_pusher()
+        except Exception as e:
+            raise CreditRiskException(e, sys)
 
         
 
@@ -87,5 +99,7 @@ class TrainingPipeline:
             model_eval_artifact = self.start_model_evaluation(data_validation_artifact=data_validation_artifact,
                                                               model_trainer_artifact=model_trainer_artifact
                                                               )
+            if model_eval_artifact.model_accepted:
+                self.start_model_pusher(model_trainer_artifact=model_trainer_artifact)
         except Exception as e:
             raise CreditRiskException(e, sys)

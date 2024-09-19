@@ -112,8 +112,8 @@ class ModelTrainer:
         try:
             dataframes = self.get_train_test_dataframe()
             train_dataframe, test_dataframe = dataframes[0], dataframes[1]
-            # train_dataframe = train_dataframe.select('features')
-            # test_dataframe = test_dataframe.select('features')
+            train_dataframe = train_dataframe.select('features')
+            test_dataframe = test_dataframe.select('features')
             print(f"Train row: {train_dataframe.count()} Test row: {test_dataframe.count()}")
             label_indexer = StringIndexer(inputCol=self.schema.target_column,
                                           outputCol=self.schema.target_indexed_label)

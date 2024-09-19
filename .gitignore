@@ -168,3 +168,5 @@ notebook/feature_engineering.ipynb
 *.pkl
 artifact/
 notebook/jar_file
+saved_models/
+credit_risk/pipeline/predictions.py
