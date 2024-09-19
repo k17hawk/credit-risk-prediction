@@ -15,6 +15,7 @@ from pyspark.sql import DataFrame
 from pyspark.ml.feature import IndexToString
 from pyspark.ml.classification import RandomForestClassifier
 from credit_risk.utils import get_score
+from credit_risk.data_access.model_trainer_artifact import ModelTrainerArtifactData
 
 class ModelTrainer:
 
@@ -24,6 +25,7 @@ class ModelTrainer:
                  schema=CreditRiskDataSchema()
                  ):
         logger.info(f"{'>>' * 20}Starting Model Training.{'<<' * 20}")
+        self.model_trainer_artifact_data = ModelTrainerArtifactData()
         self.data_transformation_artifact = data_transformation_artifact
         self.model_trainer_config = model_trainer_config
         self.schema = schema
@@ -147,6 +149,7 @@ class ModelTrainer:
             model_trainer_artifact = ModelTrainerArtifact(model_trainer_ref_artifact=ref_artifact,
                                                           model_trainer_train_metric_artifact=train_metric_artifact,
                                                           model_trainer_test_metric_artifact=test_metric_artifact)
+            self.model_trainer_artifact_data.save_model_artifact(model_trainer_artifact=model_trainer_artifact)
 
             logger.info(f"Model trainer artifact: {model_trainer_artifact}")
             logger.info(f"{'>>' * 20}Model Training End {'<<' * 20}")

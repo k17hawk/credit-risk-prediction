@@ -11,7 +11,7 @@ import re
 import time
 from credit_risk.entity import DataIngestionArtifact
 from credit_risk.config.spark_manager import spark_session
-
+from credit_risk.data_access.data_ingestion_artifact import DataIngestionArtifactData
 Download_url = namedtuple('downloadURL',['url',
                                          'file_path',
                                          'n_retry'])
@@ -20,6 +20,7 @@ class DataIngestion:
     def __init__(self,data_ingestion_config:DataIngestionConfig,n_retry: int = 5):
         try:
             logger.info(f"{'>>' * 20}Starting data ingestion.{'<<' * 20}")
+            self.data_ingestion_artifact_data = DataIngestionArtifactData()
             self.data_ingestion_config = data_ingestion_config
             self.failed_download_urls: List[Download_url] = []
             self.n_retry = n_retry
@@ -141,6 +142,7 @@ class DataIngestion:
                 feature_store_file_path=feature_store_file_path,
                 download_dir=self.data_ingestion_config.download_dir
             )
+            self.data_ingestion_artifact_data.save_ingestion_artifact(data_ingestion_artifact=artifact)
             logger.info(f"Data ingestion artifact: {artifact}")
             logger.info(f"{'>>' * 20}Data Ingestion completed.{'<<' * 20}")
             return artifact

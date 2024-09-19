@@ -11,7 +11,7 @@ from credit_risk.exception import CreditRiskException
 from credit_risk.logger import logging as logger
 from credit_risk.entity.artifact_entity import DataIngestionArtifact
 from credit_risk.entity.artifact_entity import DataValidationArtifact
-
+from credit_risk.data_access.data_validation_artifact import DataValidationArtifactData
 ERROR_MESSAGE  ='error_msg'
 MissingReport = namedtuple("MissingReport",["total_row",'missing_row','missing_percentage'])
 
@@ -22,6 +22,7 @@ class DataValidation():
                  schema = CreditRiskDataSchema()
                  ):
         try:
+            self.data_validation_artifact_data = DataValidationArtifactData()
             logger.info(f"{'>>' * 20}Starting data validation.{'<<' * 20}")
             self.data_ingestion_artifact = data_ingestion_artifact
             self.data_validation_config = data_validation_config
@@ -90,6 +91,7 @@ class DataValidation():
             artifact = DataValidationArtifact(accepted_file_path=accepted_file_path,
                                               rejected_dir=self.data_validation_config.rejected_traiin_dir
                                               )
+            self.data_validation_artifact_data.save_validation_artifact(data_valid_artifact=artifact)
             logger.info(f"Data validation artifact: [{artifact}]")
             logger.info(f"{'>>' * 20} Data Validation completed.{'<<' * 20}")
             return artifact

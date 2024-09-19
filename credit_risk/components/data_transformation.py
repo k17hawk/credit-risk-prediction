@@ -20,7 +20,7 @@ from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
 
 import pyspark.sql.functions as F
 from pyspark.ml.param.shared import Param
-
+from credit_risk.data_access.data_transformation_artifact import DataTransformationArtifactData
 class OneHotEncoderCustom(Transformer, DefaultParamsReadable, DefaultParamsWritable):
     def __init__(self, encoding_columns=None):
         super(OneHotEncoderCustom, self).__init__()
@@ -114,6 +114,7 @@ class DataTransformation:
                  schema = CreditRiskDataSchema()):
         try:
             logger.info(f"{'>>' * 20}Starting data transformation.{'<<' * 20}")
+            self.data_transformation_data = DataTransformationArtifactData()
             self.data_val_artifact = data_validation_artifact
             self.data_tf_config = data_transformation_config
             self.schema = schema
@@ -247,6 +248,7 @@ class DataTransformation:
                 transformed_test_file_path=transformed_test_data_file_path,
                 exported_pipeline_file_path=export_pipeline_file_path
             )
+            self.data_transformation_data.save_transformation_artifact(data_transformation_artifact=data_tf_artifact)
             logger.info(f"{'>>' * 20} Data Transformation completed.{'<<' * 20}")
             return data_tf_artifact
 
