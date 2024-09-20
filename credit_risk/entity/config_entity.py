@@ -178,10 +178,21 @@ class ModelEvaluationConfig:
 
 class ModelPusherConfig:
     def __init__(self,training_pipeline_config:TrainingPipelineConfig):
-        
+
         #artifact/TIMESTAMP/model_pusher/model/credit_riskEstimator
         self.pusher_model_dir = os.path.join(training_pipeline_config.artifact_dir,
                                                 MODEL_PUSHER_DIR,"model",MODEL_PUSHER_MODEL_NAME)
         
         self.saved_model_dir = MODEL_PUSHER_SAVED_MODEL_DIRS
 
+class BatchPredictionConfig:
+
+    def __init__(self):
+        try:
+            self.inbox_dir = os.path.join("data","input-inbox")
+            self.outbox_dir = os.path.join("data","output-outbox")
+            self.archive_dir = os.path.join("data","archive")
+            os.makedirs(self.outbox_dir ,exist_ok=True)
+            os.makedirs(self.archive_dir,exist_ok=True)
+        except Exception as e:
+            raise CreditRiskException(e, sys)

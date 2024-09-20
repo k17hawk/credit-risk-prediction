@@ -303,4 +303,17 @@ class DataUpsampler:
 
         return upsampled_train_df
 
+class CustomTransformer(Transformer, DefaultParamsReadable, DefaultParamsWritable):
+    
+    def __init__(self):
+        super(CustomTransformer, self).__init__()
+
+    def _transform(self, dataframe: DataFrame) -> DataFrame:
+        dataframe = dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in dataframe.columns])
+        string_columns = [c for c, dtype in dataframe.dtypes if dtype == 'string']
+
+        for col_name in string_columns:
+            dataframe = dataframe.withColumn(col_name, col(col_name).cast("float"))
+
+        return dataframe
 

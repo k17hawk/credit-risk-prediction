@@ -62,15 +62,10 @@ class ModelEvaluation:
 
             #obtain required directory path
             trained_model_file_path = self.model_trainer_artifact.model_trainer_ref_artifact.trained_model_file_path
-            label_indexer_model_path = self.model_trainer_artifact.model_trainer_ref_artifact.label_indexer_model_file_path
-
-            #load required model and label index
-            label_indexer_model = StringIndexerModel.load(label_indexer_model_path)
             trained_model = PipelineModel.load(trained_model_file_path)
 
             #Read the dataframe
             dataframe: DataFrame = self.read_data()
-            dataframe = label_indexer_model.transform(dataframe)
 
             best_model_path = self.model_resolver.get_best_model_path()
 
@@ -81,11 +76,11 @@ class ModelEvaluation:
 
             #compute f1 score for trained model
             trained_model_f1_score = get_score(dataframe=trained_model_dataframe, metric_name="f1",
-                                            label_col=self.schema.target_indexed_label,
+                                            label_col=self.schema.target_column,
                                             prediction_col=self.schema.prediction_column_name)
             #compute f1 score for best model
             best_model_f1_score = get_score(dataframe=best_model_dataframe, metric_name="f1",
-                                            label_col=self.schema.target_indexed_label,
+                                            label_col=self.schema.target_column,
                                             prediction_col=self.schema.prediction_column_name)
 
             logger.info(f"Trained_model_f1_score: {trained_model_f1_score}, Best model f1 score: {best_model_f1_score}")

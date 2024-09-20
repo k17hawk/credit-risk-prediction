@@ -51,8 +51,7 @@ class PartialModelTrainerMetricArtifact:
 @dataclass
 class PartialModelTrainerRefArtifact:
     trained_model_file_path: str
-    label_indexer_model_file_path: str
-
+    
     def to_dict(self):
         return self.__dict__
 

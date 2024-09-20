@@ -1,5 +1,5 @@
 from credit_risk.entity.schema import CreditRiskDataSchema
-from pyspark.ml.feature import OneHotEncoder,VectorAssembler,StringIndexer,MinMaxScaler
+from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.pipeline import Pipeline
 from credit_risk.config.spark_manager import spark_session
 from credit_risk.exception import CreditRiskException
@@ -8,7 +8,7 @@ from credit_risk.entity.artifact_entity import DataValidationArtifact, DataTrans
 from credit_risk.entity.config_entity import DataTransformationConfig
 from pyspark.sql import DataFrame
 from credit_risk.ml.features import  AgeGroupCategorizer,IncomeGroupCategorizer,LoanAmountCategorizer,\
-                                    RatioFeatureGenerator,DataCleaner,DataUpsampler
+                                    RatioFeatureGenerator,DataCleaner,DataUpsampler,CustomTransformer
 
 from pyspark.sql.types import DoubleType
     
@@ -152,6 +152,8 @@ class DataTransformation:
             income_group_categorizer = IncomeGroupCategorizer(inputCol='person_income', outputCol='income_group')
             loan_amount_categorizer = LoanAmountCategorizer(inputCol='loan_amnt', outputCol='loan_amount_group')
             ratio_feature_generator = RatioFeatureGenerator()
+            custom_transformer = CustomTransformer()
+            
 
         
 
@@ -162,7 +164,8 @@ class DataTransformation:
                 loan_amount_categorizer,     
                 ratio_feature_generator,      
                 one_hot_encoder,             
-                min_max_scaler          
+                min_max_scaler,
+                custom_transformer          
             ]
              
             pipeline = Pipeline(stages=stages)
@@ -202,15 +205,15 @@ class DataTransformation:
             transformed_test_dataframe = transformed_pipeline.transform(test_dataframe)
             # duplicates = [col for col in transformed_trained_dataframe.columns if transformed_trained_dataframe.columns.count(col) > 1]
             #replacing the columns
-            transformed_trained_dataframe = transformed_trained_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_trained_dataframe.columns])
-            transformed_test_dataframe = transformed_test_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_test_dataframe.columns])
+            # transformed_trained_dataframe = transformed_trained_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_trained_dataframe.columns])
+            # transformed_test_dataframe = transformed_test_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_test_dataframe.columns])
 
-            # Identify string columns and convert them to float
-            string_columns = [c for c, dtype in transformed_trained_dataframe.dtypes if dtype == 'string']
+            # # Identify string columns and convert them to float
+            # string_columns = [c for c, dtype in transformed_trained_dataframe.dtypes if dtype == 'string']
 
-            for col_name in string_columns:
-                transformed_trained_dataframe = transformed_trained_dataframe.withColumn(col_name, col(col_name).cast("float"))
-                transformed_test_dataframe = transformed_test_dataframe.withColumn(col_name, col(col_name).cast("float"))
+            # for col_name in string_columns:
+            #     transformed_trained_dataframe = transformed_trained_dataframe.withColumn(col_name, col(col_name).cast("float"))
+            #     transformed_test_dataframe = transformed_test_dataframe.withColumn(col_name, col(col_name).cast("float"))
 
             # Selecting features
             features = [col for col in transformed_trained_dataframe.columns if col != self.schema.target_column]

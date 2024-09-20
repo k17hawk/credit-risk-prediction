@@ -49,7 +49,6 @@ class ModelResolver:
 
 
 
-
 class CreditRiskEstimator:
 
     def __init__(self, model_dir=MODEL_SAVED_DIR,model_name=MODEL_NAME):
