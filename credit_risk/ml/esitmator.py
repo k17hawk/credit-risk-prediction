@@ -6,7 +6,7 @@ import os
 import time
 from typing import List, Optional
 import re
-
+from credit_risk.logger import logging
 
 MODEL_SAVED_DIR="saved_models"
 MODEL_NAME="credit_risk_estimator"
@@ -72,10 +72,24 @@ class CreditRiskEstimator:
             raise e
 
 
-    def transform(self, dataframe) -> DataFrame:
+    def transform(self, dataframe: DataFrame) -> DataFrame:
         try:
+            logging.info("Starting transformation process...")
             model = self.get_model()
-            return model.transform(dataframe)
+            logging.info("Model loaded successfully.")
+            
+            # Log the input DataFrame schema
+            logging.info("Input DataFrame schema:")
+            dataframe.printSchema()
+            
+            # Perform transformation
+            transformed_df = model.transform(dataframe)
+            
+            # Log the output DataFrame schema
+            logging.info("Output DataFrame schema after transformation:")
+            transformed_df.printSchema()
+            
+            return transformed_df
         except Exception as e:
+            logging.error(f"Error during transformation: {e}")
             raise e
-    

@@ -7,7 +7,7 @@ from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
 from typing import List
 from pyspark import keyword_only
 from pyspark.sql import functions as F
-
+from pyspark.ml.feature import VectorAssembler
 class DataCleaner(Transformer, DefaultParamsReadable, DefaultParamsWritable):
 
     @keyword_only
@@ -315,5 +315,18 @@ class CustomTransformer(Transformer, DefaultParamsReadable, DefaultParamsWritabl
         for col_name in string_columns:
             dataframe = dataframe.withColumn(col_name, col(col_name).cast("float"))
 
+        return dataframe
+
+class CustomVectorAssembler(Transformer, DefaultParamsReadable, DefaultParamsWritable):
+
+    def __init__(self, inputCols=None, outputCol="features"):
+        super(CustomVectorAssembler, self).__init__()
+        self.inputCols = inputCols
+        self.outputCol = outputCol
+
+    def _transform(self, dataframe: DataFrame) -> DataFrame:
+        # Assemble features into a single vector
+        assembler = VectorAssembler(inputCols=self.inputCols, outputCol=self.outputCol)
+        dataframe = assembler.transform(dataframe)
         return dataframe
 

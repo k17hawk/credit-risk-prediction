@@ -21,6 +21,9 @@ from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
 import pyspark.sql.functions as F
 from pyspark.ml.param.shared import Param
 from credit_risk.data_access.data_transformation_artifact import DataTransformationArtifactData
+
+
+
 class OneHotEncoderCustom(Transformer, DefaultParamsReadable, DefaultParamsWritable):
     def __init__(self, encoding_columns=None):
         super(OneHotEncoderCustom, self).__init__()
@@ -193,9 +196,7 @@ class DataTransformation:
             pipeline = self.get_data_transformation_pipeline()
             transformed_pipeline = pipeline.fit(train_dataframe)
             transformed_trained_dataframe = transformed_pipeline.transform(train_dataframe)
-            #shuffling
-            transformed_trained_dataframe = transformed_trained_dataframe.withColumn("random", F.rand(43))
-            transformed_trained_dataframe = transformed_trained_dataframe.orderBy("random").drop("random")
+
             datasampler = DataUpsampler(transformed_training_data=transformed_trained_dataframe,target_column=self.schema.target_column)
 
             transformed_trained_dataframe = datasampler.upsample_data()
@@ -203,26 +204,19 @@ class DataTransformation:
 
 
             transformed_test_dataframe = transformed_pipeline.transform(test_dataframe)
-            # duplicates = [col for col in transformed_trained_dataframe.columns if transformed_trained_dataframe.columns.count(col) > 1]
-            #replacing the columns
-            # transformed_trained_dataframe = transformed_trained_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_trained_dataframe.columns])
-            # transformed_test_dataframe = transformed_test_dataframe.select([F.col(c).alias(c.replace(" ", "_")) for c in transformed_test_dataframe.columns])
 
-            # # Identify string columns and convert them to float
-            # string_columns = [c for c, dtype in transformed_trained_dataframe.dtypes if dtype == 'string']
-
-            # for col_name in string_columns:
-            #     transformed_trained_dataframe = transformed_trained_dataframe.withColumn(col_name, col(col_name).cast("float"))
-            #     transformed_test_dataframe = transformed_test_dataframe.withColumn(col_name, col(col_name).cast("float"))
-
-            # Selecting features
             features = [col for col in transformed_trained_dataframe.columns if col != self.schema.target_column]
 
             # Assembling features
             assembler = VectorAssembler(inputCols=features, outputCol="features")
-            transformed_trained_dataframe = assembler.transform(transformed_trained_dataframe)
-            transformed_test_dataframe = assembler.transform(transformed_test_dataframe)
-            
+            final_pipeline = Pipeline(stages=pipeline.getStages() + [assembler])
+
+            final_transformed_pipeline = final_pipeline.fit(transformed_trained_dataframe)
+
+            transformed_test_dataframe = final_transformed_pipeline.transform(transformed_test_dataframe)
+            transformed_trained_dataframe = final_transformed_pipeline.transform(transformed_trained_dataframe)
+
+
 	    
 
             export_pipeline_file_path = self.data_tf_config.export_pipeline_dir
@@ -236,7 +230,7 @@ class DataTransformation:
             transformed_test_data_file_path = os.path.join(self.data_tf_config.transformation_test_dir,
                                                             self.data_tf_config.file_name) 
             logger.info(f"saving the pipeline at[{export_pipeline_file_path}]")
-            transformed_pipeline.save(export_pipeline_file_path)
+            final_transformed_pipeline.save(export_pipeline_file_path)
 
             logger.info(f"Saving transformed train data at: [{transformed_train_data_file_path}]")
             print(transformed_trained_dataframe.count(),len(transformed_trained_dataframe.columns))

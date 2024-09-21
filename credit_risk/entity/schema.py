@@ -139,6 +139,12 @@ class CreditRiskDataSchema:
         return features
     
     @property
+    def required_columns_prediction(self) -> List[str]:
+        features =  self.one_hot_encoding_features + self.numerical_columns
+        return features
+    
+
+    @property
     def required_oneHot_features(self) -> List[str]:
         features  =self.one_hot_encoding_features + self.one_hot_encoding_features_derived
         return features

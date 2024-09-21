@@ -192,7 +192,9 @@ class BatchPredictionConfig:
             self.inbox_dir = os.path.join("data","input-inbox")
             self.outbox_dir = os.path.join("data","output-outbox")
             self.archive_dir = os.path.join("data","archive")
+            self.parquet_dir = os.path.join("data",'parquet_input')
             os.makedirs(self.outbox_dir ,exist_ok=True)
             os.makedirs(self.archive_dir,exist_ok=True)
+            os.makedirs(self.parquet_dir,exist_ok=True)
         except Exception as e:
             raise CreditRiskException(e, sys)
