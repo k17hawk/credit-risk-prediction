@@ -8,8 +8,8 @@ from typing import List
 from pyspark import keyword_only
 from pyspark.sql import functions as F
 from pyspark.ml.feature import VectorAssembler
-class DataCleaner(Transformer, DefaultParamsReadable, DefaultParamsWritable):
 
+class DataCleaner(Transformer, DefaultParamsReadable, DefaultParamsWritable):
     @keyword_only
     def __init__(self, age_column: str = None, age_threshold: int = None, column_to_drop: str = None, emp_length_column: str = None, emp_length_threshold: int = None):
         super(DataCleaner, self).__init__()

@@ -156,6 +156,7 @@ class DataTransformation:
             loan_amount_categorizer = LoanAmountCategorizer(inputCol='loan_amnt', outputCol='loan_amount_group')
             ratio_feature_generator = RatioFeatureGenerator()
             custom_transformer = CustomTransformer()
+            assembler = VectorAssembler(inputCols=self.schema.assambling_column, outputCol=self.schema.output_assambling_column)
             
 
         
@@ -168,7 +169,8 @@ class DataTransformation:
                 ratio_feature_generator,      
                 one_hot_encoder,             
                 min_max_scaler,
-                custom_transformer          
+                custom_transformer,
+                assembler
             ]
              
             pipeline = Pipeline(stages=stages)
@@ -201,23 +203,7 @@ class DataTransformation:
 
             transformed_trained_dataframe = datasampler.upsample_data()
 
-
-
             transformed_test_dataframe = transformed_pipeline.transform(test_dataframe)
-
-            features = [col for col in transformed_trained_dataframe.columns if col != self.schema.target_column]
-
-            # Assembling features
-            assembler = VectorAssembler(inputCols=features, outputCol="features")
-            final_pipeline = Pipeline(stages=pipeline.getStages() + [assembler])
-
-            final_transformed_pipeline = final_pipeline.fit(transformed_trained_dataframe)
-
-            transformed_test_dataframe = final_transformed_pipeline.transform(transformed_test_dataframe)
-            transformed_trained_dataframe = final_transformed_pipeline.transform(transformed_trained_dataframe)
-
-
-	    
 
             export_pipeline_file_path = self.data_tf_config.export_pipeline_dir
             os.makedirs(export_pipeline_file_path,exist_ok=True)
@@ -230,7 +216,7 @@ class DataTransformation:
             transformed_test_data_file_path = os.path.join(self.data_tf_config.transformation_test_dir,
                                                             self.data_tf_config.file_name) 
             logger.info(f"saving the pipeline at[{export_pipeline_file_path}]")
-            final_transformed_pipeline.save(export_pipeline_file_path)
+            transformed_pipeline.save(export_pipeline_file_path)
 
             logger.info(f"Saving transformed train data at: [{transformed_train_data_file_path}]")
             print(transformed_trained_dataframe.count(),len(transformed_trained_dataframe.columns))
