@@ -1,0 +1,109 @@
+[33mcommit 4d9c950e04d5b0c2848f37001d8a775fe0bd8a6f[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Tue Sep 24 14:46:44 2024 -0400
+
+    Revert "updated model evaluation"
+    
+    This reverts commit 8bde7628ef940feb9f86031a2b905ba796056f39.
+
+[33mcommit cfd7f447cd5996559c89138d0d09e1bcefabe085[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Tue Sep 24 14:44:26 2024 -0400
+
+    dummy updates
+
+[33mcommit 8bde7628ef940feb9f86031a2b905ba796056f39[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Mon Sep 23 20:09:36 2024 -0400
+
+    updated model evaluation
+
+[33mcommit 47264e1392a09793df9c73383bc5b18ef2c1e5d0[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Sun Sep 22 20:11:21 2024 -0400
+
+    updated schema and data_transformation component
+
+[33mcommit b37c21436b524207a73639f0f031dc20a7207a8c[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Sat Sep 21 12:44:24 2024 -0400
+
+    code updated in data transformation component
+
+[33mcommit 770a63e249457f2b669b5dfca2926630a296d9b4[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Fri Sep 20 11:30:46 2024 -0400
+
+    code cleaned and custom data transformation  pipeline added
+
+[33mcommit bcf370c299615acf61eb3b05c32a6552910f58c5[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Thu Sep 19 17:49:46 2024 -0400
+
+    added model pusher pipeline
+
+[33mcommit a97c7f5468a37f526e932f6c13962cb2ce6f73d1[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Thu Sep 19 17:07:26 2024 -0400
+
+    added artifact information to mongodb
+
+[33mcommit dca513197dccd61048da957ba848bc9280d95749[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Thu Sep 19 16:23:24 2024 -0400
+
+    model evaluation tested and run
+
+[33mcommit 303d53473db367b7395976909c0b980c00e58ee8[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Wed Sep 18 17:44:33 2024 -0400
+
+    model training pipeline tested and run
+
+[33mcommit ef1f75cac1cb24db73bb5c758e49045de3a37971[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Tue Sep 17 12:11:17 2024 -0400
+
+    data transformation buit and tested
+
+[33mcommit 8b561f9179f9eac128ade2b89b1ff1975a280ffa[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Mon Sep 16 13:01:08 2024 -0400
+
+    data transformation entity and artifact is created
+
+[33mcommit 46ad2ab9e7c6b2b2857f06de1020344526b38b7f[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Mon Sep 16 12:44:16 2024 -0400
+
+    data validation tested, configured and parquet conversion function added in data ingeston
+
+[33mcommit 10c30e2605b6d2adf0edf299670b9a5c1f0eeef3[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Mon Sep 16 09:50:59 2024 -0400
+
+    data ingestion  built & tested successfully
+
+[33mcommit 37f6a78910702d1e074c09b86ccd722eb0b22a49[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Sun Sep 15 18:43:03 2024 -0400
+
+    feature engineering and model training done
+
+[33mcommit 989e8a1af8b18560be8ea59150a91c0ea7da7dad[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Sun Sep 15 18:36:50 2024 -0400
+
+    feature engineering and model training done
+
+[33mcommit de72f05e90ceacc04eddca2da92ea5b0abfc7149[m
+Author: dahalkumar <kumardahal536@gmail.com>
+Date:   Thu Sep 12 11:24:32 2024 -0400
+
+    data added
+
+[33mcommit 16d65999e6f4792108eb8d9a54687468d5be4106[m
+Author: kumar dahal <39254221+k17hawk@users.noreply.github.com>
+Date:   Thu Sep 12 11:21:46 2024 -0400
+
+    Initial commit

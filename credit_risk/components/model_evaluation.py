@@ -10,6 +10,7 @@ from pyspark.ml.feature import StringIndexerModel
 from pyspark.ml.pipeline import PipelineModel
 from credit_risk.config.spark_manager import spark_session
 from credit_risk.utils import get_score
+from credit_risk.ml.features import LoanAmountCategorizer
 
 from credit_risk.data_access.model_eval_artifcat import ModelEvaluationArtifactData
 from credit_risk.ml.esitmator import  ModelResolver,CreditRiskEstimator
@@ -30,7 +31,7 @@ class ModelEvaluation:
             self.model_trainer_artifact = model_trainer_artifact
             self.schema = schema
             self.model_resolver = ModelResolver()
-            self.finance_estimator = CreditRiskEstimator()
+            self.credit_estimator = CreditRiskEstimator()
         except Exception as e:
             raise CreditRiskException(e, sys)
 
@@ -66,13 +67,22 @@ class ModelEvaluation:
 
             #Read the dataframe
             dataframe: DataFrame = self.read_data()
+            # print("applying LoanAmountCategorizer ")
+            # loan_amount_categorizer = LoanAmountCategorizer(input_col=self.schema.col_loan_amnt,output_col=self.schema.col_loan_amount_group)
+            
+            # dataframe = loan_amount_categorizer.categorize(dataframe)
 
-            best_model_path = self.model_resolver.get_best_model_path()
+            print("applying pipeline to data")
+            best_model_path = self.model_resolver.get_best_model_path() 
 
-            best_model_dataframe = self.finance_estimator.transform(dataframe)
+            best_model_dataframe = self.credit_estimator.transform(dataframe)
+            print("applying pipeline completed..")
 
             #prediction using trained model
+            print("applying pipeline from best model")
             trained_model_dataframe = trained_model.transform(dataframe)
+
+            print("pipeline executed successfully...")
 
             #compute f1 score for trained model
             trained_model_f1_score = get_score(dataframe=trained_model_dataframe, metric_name="f1",

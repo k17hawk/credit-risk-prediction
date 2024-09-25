@@ -72,7 +72,6 @@ class Prediction:
             for file_name in input_files:
                 data_file_path = os.path.join(self.batch_config.parquet_dir, file_name)
                 df: DataFrame = spark_session.read.parquet(data_file_path, multiline=True)
-                df = df.withColumnRenamed('cb_person_cred_hist_length\r', 'cb_person_cred_hist_length')
 
                 # Log the schema and data count
                 df.printSchema()
@@ -83,24 +82,25 @@ class Prediction:
                 print(f"Row: [{df.count()}] Column: [{len(df.columns)}]")
                 print(f"Expected Column: {self.schema.required_columns_prediction}\nPresent Columns: {df.columns}")
                 print(df.columns)
+                # for index,sstage in enumerate(credit_risk_estimator.stage)
 
-                # try:
-                #     prediction_df = credit_risk_estimator.transform(dataframe=df)
-                # except Exception as e:
-                #     print(f"Error during transformation for {file_name}: {e}")
-                #     continue  # Skip to the next file on error``
+                try:
+                    prediction_df = credit_risk_estimator.transform(dataframe=df)
+                except Exception as e:
+                    print(f"Error during transformation for {file_name}: {e}")
+                    continue  # Skip to the next file on error``
 
-                # prediction_file_path = os.path.join(self.batch_config.outbox_dir, f"{os.path.splitext(file_name)[0]}_predicted_{TIMESTAMP}.parquet")
+                prediction_file_path = os.path.join(self.batch_config.outbox_dir, f"{os.path.splitext(file_name)[0]}_predicted_{TIMESTAMP}.parquet")
 
-                # if os.path.exists(prediction_file_path):
-                #     print(f"Prediction file already exists: {prediction_file_path}. Skipping this file.")
-                #     continue
+                if os.path.exists(prediction_file_path):
+                    print(f"Prediction file already exists: {prediction_file_path}. Skipping this file.")
+                    continue
                 
-                # prediction_df.write.parquet(prediction_file_path)
+                prediction_df.write.parquet(prediction_file_path)
 
-                # # Archive the original data
-                # archive_file_path = os.path.join(self.batch_config.archive_dir, f"{os.path.splitext(file_name)[0]}_archived_{TIMESTAMP}.parquet")
-                # df.write.parquet(archive_file_path)
+                # Archive the original data
+                archive_file_path = os.path.join(self.batch_config.archive_dir, f"{os.path.splitext(file_name)[0]}_archived_{TIMESTAMP}.parquet")
+                df.write.parquet(archive_file_path)
                 
         except Exception as e:
             raise CreditRiskException(e, sys)

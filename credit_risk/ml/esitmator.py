@@ -8,6 +8,7 @@ from typing import List, Optional
 import re
 from credit_risk.logger import logging
 
+from credit_risk.entity.schema import CreditRiskDataSchema
 MODEL_SAVED_DIR="saved_models"
 MODEL_NAME="credit_risk_estimator"
 
@@ -80,15 +81,19 @@ class CreditRiskEstimator:
             
             # Log the input DataFrame schema
             logging.info("Input DataFrame schema:")
+            # for index, stage in enumerate(model.stages):
+            #     print("applying",stage)
+            #     dataframe.printSchema()
+            #     df = stage.transform(dataframe)
+            #     df.printSchema()
+            #     print("successful",stage)
+          
             dataframe.printSchema()
-            
-            # Perform transformation
             transformed_df = model.transform(dataframe)
-            
+            dataframe.printSchema()
+
             # Log the output DataFrame schema
             logging.info("Output DataFrame schema after transformation:")
-            transformed_df.printSchema()
-            
             return transformed_df
         except Exception as e:
             logging.error(f"Error during transformation: {e}")

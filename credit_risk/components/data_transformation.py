@@ -15,39 +15,127 @@ from pyspark.sql.types import DoubleType
 from pyspark.sql.functions import col, rand,count
 import os,sys
 from credit_risk.constant import AGE_BINS,AGE_LABELS
-from pyspark.ml import Transformer
-from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
-
-import pyspark.sql.functions as F
-from pyspark.ml.param.shared import Param
 from credit_risk.data_access.data_transformation_artifact import DataTransformationArtifactData
 
+from pyspark.ml import Transformer
+from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
+from pyspark.ml.param.shared import Param
+from pyspark.sql import DataFrame
+import pyspark.sql.functions as F
+from pyspark.ml import Pipeline, PipelineModel
+from pyspark.ml.feature import StringIndexer, OneHotEncoder
+from pyspark.sql import DataFrame
 
+class OneHotEncoderPipeline:
+    def __init__(self, input_cols: list, output_cols: list):
+        if len(input_cols) != len(output_cols):
+            raise ValueError("Input columns and output columns lists must have the same length.")
+        
+        self.input_cols = input_cols
+        self.output_cols = output_cols
+        self.pipeline = None
+        self.pipeline_model = None
 
-class OneHotEncoderCustom(Transformer, DefaultParamsReadable, DefaultParamsWritable):
-    def __init__(self, encoding_columns=None):
-        super(OneHotEncoderCustom, self).__init__()
+    def fit(self, df: DataFrame) -> None:
+        """Fit the pipeline on the provided DataFrame."""
+        stages = []
+        
+        for input_col, output_col in zip(self.input_cols, self.output_cols):
+            indexer = StringIndexer(inputCol=input_col, outputCol=f"{input_col}_index")
+            encoder = OneHotEncoder(inputCols=[f"{input_col}_index"], outputCols=[output_col])
+            stages.extend([indexer, encoder])
+        
+        self.pipeline = Pipeline(stages=stages)
+        self.pipeline_model = self.pipeline.fit(df)
+
+    def save(self, path: str) -> None:
+        """Save the fitted pipeline model to the specified path."""
+        if self.pipeline_model is not None:
+            self.pipeline_model.save(path)
+
+    @classmethod
+    def load(cls, path: str) -> 'OneHotEncoderPipeline':
+        """Load a pipeline model from the specified path."""
+        instance = cls(input_cols=[], output_cols=[])
+        instance.pipeline_model = PipelineModel.load(path)
+        return instance
+
+    def transform(self, df: DataFrame) -> DataFrame:
+        """Transform the DataFrame using the fitted pipeline model."""
+        if self.pipeline_model is None:
+            raise Exception("Model must be fitted before calling transform.")
+        return self.pipeline_model.transform(df)
     
-        self.encoding_columns = Param(self, "encoding_columns", "columns to be one-hot encoded")
+# class OneHotEncoderCustom(Transformer, DefaultParamsWritable, DefaultParamsReadable):
+#     def __init__(self, encoding_columns=None, predefined_columns=None):
+#         super(OneHotEncoderCustom, self).__init__()
+#         self.schema = CreditRiskDataSchema()
+#         self.encoding_columns = Param(self, "encoding_columns", "column to be one-hot encoded")
+#         self.predefined_columns = predefined_columns
 
-        if encoding_columns is not None:
-            self._set(encoding_columns=encoding_columns)
+#         if encoding_columns is not None:
+#             self._set(encoding_columns=encoding_columns)
 
-    def _transform(self, df: DataFrame) -> DataFrame:
-        encoding_columns = self.getOrDefault(self.encoding_columns)
+#     def _transform(self, df: DataFrame) -> DataFrame:
+#         # Get the column name to encode
+#         encoding_columns = self.getOrDefault(self.encoding_columns)
 
-        for column in encoding_columns:
-            distinct_values = df.select(column).distinct().rdd.map(lambda x: x[0]).collect()
+#         # Check if the encoding column exists in the DataFrame
+#         if encoding_columns not in df.columns:
+#             raise ValueError(f"Column {encoding_columns} does not exist in DataFrame. Available columns: {df.columns}")
 
-            # Create one-hot encoded columns
-            for value in distinct_values:
-                df = df.withColumn(f"{column}_{value}", F.when(F.col(column) == value, 1).otherwise(0))
+#         # Get distinct values from the specified column (these are the categories for one-hot encoding)
+#         distinct_values = df.select(encoding_columns).distinct().rdd.map(lambda x: x[0]).collect()
 
-            # Drop the original column
-            df = df.drop(column)
+#         # Create one-hot encoded columns based on distinct values
+#         for value in distinct_values:
+#             if value is not None:
+#                 # Create new columns like encoding_column_value with 1 if matches, else 0
+#                 df = df.withColumn(f"{encoding_columns}_{value}", F.when(F.col(encoding_columns) == value, 1).otherwise(0))
 
-        return df
+#         # Ensure all predefined columns are present (e.g., in the prediction phase)
+#         if self.predefined_columns:
+#             for predefined_column in self.predefined_columns:
+#                 if predefined_column not in df.columns:
+#                     # Add the missing predefined column with a default value of 0
+#                     df = df.withColumn(predefined_column, F.lit(0))
 
+#         # Optionally drop the original column after one-hot encoding
+#         df = df.drop(encoding_columns)
+
+#         return df
+
+# class OneHotEncoderCustom(Transformer, DefaultParamsReadable, DefaultParamsWritable):
+#     def __init__(self, encoding_columns=None):
+#         super(OneHotEncoderCustom, self).__init__()
+    
+#         self.encoding_columns = Param(self, "encoding_columns", "columns to be one-hot encoded")
+
+#         if encoding_columns is not None:
+#             self._set(encoding_columns=encoding_columns)
+
+#     def _transform(self, df: DataFrame) -> DataFrame:
+#         encoding_columns = self.getOrDefault(self.encoding_columns)
+
+#         for column in encoding_columns:
+#             distinct_values = df.select(column).distinct().rdd.map(lambda x: x[0]).collect()
+
+#             # Create one-hot encoded columns only for existing distinct values
+#             for value in distinct_values:
+#                 if value is not None:  # Skip None values if present
+#                     column_name = f"{column}_{value}"
+#                     if column_name not in df.columns:  # Check if the column already exists
+#                         df = df.withColumn(column_name, F.when(F.col(column) == value, 1).otherwise(0))
+#                 else:
+#                     # If value is None, we can simply initialize it to 0 for the new column
+#                     column_name = f"{column}_None"
+#                     if column_name not in df.columns:  # Check if the column already exists
+#                         df = df.withColumn(column_name, F.lit(0))
+
+#             # Optionally drop the original column if needed
+#             df = df.drop(column)
+
+#         return df
 
 
 
@@ -136,9 +224,96 @@ class DataTransformation:
     
     def get_data_transformation_pipeline(self) -> Pipeline:
         try:
+
+            onehot_encoded = OneHotEncoderPipeline(input_cols=self.schema.required_oneHot_features(),output_cols=)
            
-            one_hot_encoder = OneHotEncoderCustom(encoding_columns=self.schema.required_oneHot_features)
+            expected_columns_cb_file_default = [self.schema.col_cb_person_default_on_file_N,self.schema.col_cb_person_default_on_file_Y] 
+            cb_file_hot_encoder = OneHotEncoderCustom(
+                                encoding_columns=self.schema.col_cb_person_default_on_file, 
+                                predefined_columns=expected_columns_cb_file_default
+            )
+            person_home_ownership_default = [self.schema.col_person_home_ownership_MORTGAGE,
+                                             self.schema.col_person_home_ownership_RENT,
+                                             self.schema.col_person_home_ownership_OTHER,
+                                             self.schema.col_person_home_ownership_OWN]
             
+            person_home_ownership_encoder = OneHotEncoderCustom(
+                encoding_columns=self.schema.col_person_home_ownership,
+                predefined_columns=person_home_ownership_default
+            )
+            
+            
+            loan_intent_default = [self.schema.col_loan_intent_DEBTCONSOLIDATION,
+                                   self.schema.col_loan_intent_VENTURE,
+                                   self.schema.col_loan_intent_PERSONAL,
+                                   self.schema.col_loan_intent_EDUCATION,
+                                   self.schema.col_loan_intent_HOMEIMPROVEMENT,
+                                   self.schema.col_loan_intent_MEDICAL
+                                   ]
+            
+            loan_intent_encoder = OneHotEncoderCustom(
+                encoding_columns=self.schema.col_loan_intent,
+                predefined_columns=loan_intent_default
+            )
+            
+
+            loan_grade_default = [self.schema.col_loan_grade_F,
+                                   self.schema.col_loan_grade_E,
+                                   self.schema.col_loan_grade_B,
+                                   self.schema.col_loan_grade_D,
+                                   self.schema.col_loan_grade_C,
+                                   self.schema.col_loan_grade_A,
+                                   self.schema.col_loan_grade_G]
+            loan_grade_encoder = OneHotEncoderCustom(
+                encoding_columns=self.schema.col_loan_grade,
+                predefined_columns=loan_grade_default
+            )
+
+            
+
+            income_group_default = [self.schema.col_income_group_low_middle,
+                                   self.schema.col_income_group_low,
+                                   self.schema.col_income_group_high,
+                                   self.schema.col_income_group_middle,
+                                   self.schema.col_income_group_high_middle
+                                   ]
+            
+            income_group_encoder = OneHotEncoderCustom(
+                encoding_columns = self.schema.col_income_group,
+                predefined_columns = income_group_default
+            )
+
+            
+
+
+            age_group_default = [self.schema.col_age_group_26_35,
+                                   self.schema.col_age_group_20_25,
+                                   self.schema.col_age_group_46_55,
+                                   self.schema.col_age_group_36_45,
+                                   self.schema.col_age_group_66_80,
+                                   self.schema.col_age_group_56_65
+                                   ]
+            
+            age_group_encoder = OneHotEncoderCustom(
+                encoding_columns=self.schema.col_age_group,
+                predefined_columns=age_group_default
+            )
+
+            
+
+            loan_amount_group_default = [self.schema.col_loan_amount_group_high,
+                                   self.schema.col_loan_amount_group_medium,
+                                   self.schema.col_loan_amount_group_very_high,
+                                   self.schema.col_loan_amount_group_small
+                                   ]
+            
+            loan_amount_group_encoder = OneHotEncoderCustom(
+                encoding_columns=self.schema.col_loan_amount_group,
+                predefined_columns=loan_amount_group_default
+            )
+            
+
+
 
             # Instantiate the custom Min-Max scaler with a specific range (-3 to 3)
             min_max_scaler = MinMaxScalerCustom(columns_to_scale=self.schema.required_scaling_columns, min_val=-3, max_val=3)
@@ -153,21 +328,26 @@ class DataTransformation:
                                     )
             age_group_categorizer = AgeGroupCategorizer(inputCol='person_age', outputCol='age_group', bins=AGE_BINS, labels=AGE_LABELS)
             income_group_categorizer = IncomeGroupCategorizer(inputCol='person_income', outputCol='income_group')
-            loan_amount_categorizer = LoanAmountCategorizer(inputCol='loan_amnt', outputCol='loan_amount_group')
+            loan_amount_categorizer = LoanAmountCategorizer(inputCol=self.schema.col_loan_amnt,outputCol=self.schema.col_loan_amount_group)
+    
+
             ratio_feature_generator = RatioFeatureGenerator()
             custom_transformer = CustomTransformer()
             assembler = VectorAssembler(inputCols=self.schema.assambling_column, outputCol=self.schema.output_assambling_column)
-            
-
         
-
             stages = [
                 data_cleaner,                
                 age_group_categorizer,       
                 income_group_categorizer,   
                 loan_amount_categorizer,     
                 ratio_feature_generator,      
-                one_hot_encoder,             
+                cb_file_hot_encoder,
+                person_home_ownership_encoder,
+                loan_intent_encoder,
+                loan_grade_encoder,
+                income_group_encoder,
+                age_group_encoder,
+                loan_amount_group_encoder,            
                 min_max_scaler,
                 custom_transformer,
                 assembler
@@ -183,6 +363,7 @@ class DataTransformation:
     def initiate_data_transformation(self) -> DataTransformationArtifact:
         try:
             dataframe: DataFrame = self.read_data()
+            dataframe.printSchema()
             logger.info(f"Number of row: [{dataframe.count()}] and column: [{len(dataframe.columns)}]")
 
             test_size = self.data_tf_config.test_size
@@ -193,6 +374,11 @@ class DataTransformation:
 
             logger.info(f"Test dataset has number of row: [{test_dataframe.count()}] and"
                         f" column: [{len(test_dataframe.columns)}]")
+            # loan_amount_categorizer = LoanAmountCategorizer(input_col=self.schema.col_loan_amnt,output_col=self.schema.col_loan_amount_group)
+    
+
+            # train_dataframe = loan_amount_categorizer.categorize(train_dataframe)
+            # test_dataframe = loan_amount_categorizer.categorize(test_dataframe)
 
 
             pipeline = self.get_data_transformation_pipeline()

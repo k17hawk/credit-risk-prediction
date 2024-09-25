@@ -1,7 +1,6 @@
 from typing import List
 from pyspark.sql.types import (TimestampType, 
             StringType, FloatType, StructType, StructField)
-from credit_risk.exception import CreditRiskException
 from pyspark.sql import DataFrame
 import os, sys
 from typing import Dict
@@ -27,6 +26,7 @@ class CreditRiskDataSchema:
         self.col_income_group = 'income_group'
         self.col_age_group = 'age_group'
         self.col_loan_amount_group = 'loan_amount_group'
+   
 
         # cb_person_default_on_file columns
         self.col_cb_person_default_on_file_Y = 'cb_person_default_on_file_Y'
@@ -69,6 +69,7 @@ class CreditRiskDataSchema:
         self.col_age_group_36_45 = 'age_group_36-45'
         self.col_age_group_66_80 = 'age_group_66-80'
         self.col_age_group_56_65 = 'age_group_56-65'
+        
 
         # loan_amount_group columns
         self.col_loan_amount_group_high = 'loan_amount_group_high'
@@ -170,7 +171,7 @@ class CreditRiskDataSchema:
             ])
             return schema
         except Exception as e:
-            raise CreditRiskException(e,sys) from e
+            raise e
         
     @property
     def target_column(self) -> str:
@@ -367,9 +368,9 @@ class CreditRiskDataSchema:
         return features
     
 
-    @property
+    
     def required_oneHot_features(self) -> List[str]:
-        features  =self.one_hot_encoding_features + self.one_hot_encoding_features_derived
+        features = self.one_hot_encoding_features + self.one_hot_encoding_features_derived
         return features
     
     @property
@@ -397,6 +398,10 @@ class CreditRiskDataSchema:
     def scaled_vector_input_features(self) -> str:
         return "scaled_input_features"
     
+
+    @property
+    def output_one_hot_encoded_feature(self) -> List[str]:
+        ['cb_person_default_on_file', 'person_home_ownership', 'loan_intent', 'loan_grade', 'income_group', 'age_group', 'loan_amount_group']
 
 
 

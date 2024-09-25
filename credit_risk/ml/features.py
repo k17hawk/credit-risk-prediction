@@ -181,11 +181,23 @@ class IncomeGroupCategorizer(Transformer, DefaultParamsReadable, DefaultParamsWr
             .otherwise('high')
         )
         return dataframe
+# class LoanAmountCategorizer:
+#     def __init__(self, input_col: str = 'loan_amnt', output_col: str = 'loan_amount_group'):
+#         self.input_col = input_col
+#         self.output_col = output_col
 
+#     def categorize(self, dataframe: DataFrame) -> DataFrame:
+#         return dataframe.withColumn(
+#             self.output_col,
+#             when(col(self.input_col).between(0, 5000), 'small')
+#             .when(col(self.input_col).between(5001, 10000), 'medium')
+#             .when(col(self.input_col).between(10001, 15000), 'high')
+#             .otherwise('very_high')
+#         )
 class LoanAmountCategorizer(Transformer, DefaultParamsReadable, DefaultParamsWritable):
     
     @keyword_only
-    def __init__(self, inputCol: str = None, outputCol: str = 'loan_amount_group'):
+    def __init__(self, inputCol: str = "loan_amnt", outputCol: str = 'loan_amount_group'):
         super(LoanAmountCategorizer, self).__init__()
         self._inputCol = inputCol
         self._outputCol = outputCol
@@ -213,13 +225,13 @@ class LoanAmountCategorizer(Transformer, DefaultParamsReadable, DefaultParamsWri
     def _transform(self, dataframe: DataFrame) -> DataFrame:
         input_col = self.getInputCol()
         output_col = self.getOutputCol()
-
+        
         dataframe = dataframe.withColumn(
             output_col,
             when(col(input_col).between(0, 5000), 'small')
             .when(col(input_col).between(5001, 10000), 'medium')
             .when(col(input_col).between(10001, 15000), 'high')
-            .otherwise('very high')
+            .otherwise('very_high')
         )
         
         return dataframe
