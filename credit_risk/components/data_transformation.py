@@ -87,17 +87,6 @@ class DataTransformation:
     
     def get_data_transformation_pipeline(self) -> Pipeline:
         try:
-
-            onehot_encoded = OneHotEncoder(inputCols=self.schema.required_oneHot_features(),
-                                                   outputCol=self.schema.output_one_hot_encoded_feature)
-            
-        
-            
-
-            min_max_scaler = MinMaxScaler(inputCol=self.schema.output_assambling_column,outputCol=self.schema.min_max_features)
-
-
-
             data_cleaner = DataCleaner(
                                         age_column='person_age',
                                         age_threshold=80,
@@ -112,21 +101,35 @@ class DataTransformation:
     
 
             ratio_feature_generator = RatioFeatureGenerator()
-            assembler = VectorAssembler(inputCols=self.schema.assambling_columns, outputCol=self.schema.output_assambling_column)
-        
             stages = [
                 data_cleaner,                
                 age_group_categorizer,       
                 income_group_categorizer,   
                 loan_amount_categorizer,     
-                ratio_feature_generator,  
-                onehot_encoded,
-                customTransformer,
-                assembler,
-                min_max_scaler
-                  
-                
+                ratio_feature_generator,           
             ]
+
+            
+            for im_one_hot_feature, string_indexer_col in zip(self.schema.required_oneHot_features(),
+                                                              self.schema.string_indexer_one_hot_features):
+                string_indexer = StringIndexer(inputCol=im_one_hot_feature, outputCol=string_indexer_col)
+                stages.append(string_indexer)
+            onehot_encoded = OneHotEncoder(inputCols=self.schema.string_indexer_one_hot_features,
+                                                   outputCols=self.schema.output_one_hot_encoded_feature)
+            stages.append(onehot_encoded)
+
+            
+        
+            
+
+            min_max_scaler = MinMaxScaler(inputCol=self.schema.output_assambling_column,outputCol=self.schema.min_max_features)
+
+            assembler = VectorAssembler(inputCols=self.schema.assambling_columns, outputCol=self.schema.output_assambling_column)
+            stages.append(customTransformer)
+            stages.append(assembler)
+            stages.append(min_max_scaler)
+        
+            
              
             pipeline = Pipeline(stages=stages)
             logger.info(f"Data transformation pipeline: [{pipeline}]")
@@ -138,7 +141,6 @@ class DataTransformation:
     def initiate_data_transformation(self) -> DataTransformationArtifact:
         try:
             dataframe: DataFrame = self.read_data()
-            dataframe.printSchema()
             logger.info(f"Number of row: [{dataframe.count()}] and column: [{len(dataframe.columns)}]")
 
             test_size = self.data_tf_config.test_size
@@ -150,7 +152,7 @@ class DataTransformation:
             logger.info(f"Test dataset has number of row: [{test_dataframe.count()}] and"
                         f" column: [{len(test_dataframe.columns)}]")
             print("before pipeline")
-            train_dataframe.printSchema()
+     
 
             pipeline = self.get_data_transformation_pipeline()
             transformed_pipeline = pipeline.fit(train_dataframe)

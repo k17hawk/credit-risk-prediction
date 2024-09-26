@@ -51,24 +51,30 @@ class ModelTrainer:
             scores: List[tuple] = []
             for metric_name in metric_names:
                 score = get_score(metric_name=metric_name,
-                                  # A keyword argument.
                                   dataframe=dataframe,
                                   label_col=self.schema.target_column,
-                                  prediction_col=self.schema.prediction_column_name, )
+                                  prediction_col=self.schema.prediction_column_name,)
                 scores.append((metric_name, score))
             return scores
         except Exception as e:
             raise CreditRiskException(e, sys)
 
 
-    def get_model(self) -> Pipeline:
+    def get_model(self,label_indexer_model: StringIndexerModel) -> Pipeline:
         try:
             stages = []
             logger.info("Creating Random Forest Classifier class.")
             random_forest_clf = RandomForestClassifier(labelCol=self.schema.target_column,
-                                                       featuresCol=self.schema.min_max_features)
+                                                       featuresCol=self.schema.min_max_features,
+                                                       predictionCol=self.schema.prediction_column_name)
+            logger.info("Creating Label generator")
+            label_generator = IndexToString(inputCol=self.schema.prediction_column_name,
+                                            outputCol=f"{self.schema.prediction_column_name}_{self.schema.target_column}",
+                                            labels=label_indexer_model.labels)
             stages.append(random_forest_clf)
+            stages.append(label_generator)
             pipeline = Pipeline(stages=stages)
+            
             return pipeline
         except Exception as e:
             raise CreditRiskException(e, sys)
@@ -109,17 +115,25 @@ class ModelTrainer:
             # train_dataframe = train_dataframe.select('features')
             # test_dataframe = test_dataframe.select('features')
             print(f"Train row: {train_dataframe.count()} Test row: {test_dataframe.count()}")
-
+            label_indexer = StringIndexer(inputCol=self.schema.target_column,
+                                          outputCol=self.schema.target_indexed_label)
+            label_indexer_model = label_indexer.fit(train_dataframe)
 
             os.makedirs(os.path.dirname(self.model_trainer_config.label_indexer_model_dir), exist_ok=True)
-            print(train_dataframe.printSchema())
+            label_indexer_model.save(self.model_trainer_config.label_indexer_model_dir)
+
+            train_dataframe = label_indexer_model.transform(train_dataframe)
+            test_dataframe = label_indexer_model.transform(test_dataframe)
    
 
-            model = self.get_model()
+            model = self.get_model(label_indexer_model=label_indexer_model)
             trained_model = model.fit(train_dataframe)
 
             train_dataframe_pred = trained_model.transform(train_dataframe)
             test_dataframe_pred = trained_model.transform(test_dataframe)
+            
+
+            
 
             print(f"number of row in training: {train_dataframe_pred.count()}")
             scores = self.get_scores(dataframe=train_dataframe_pred,metric_names=self.model_trainer_config.metric_list)

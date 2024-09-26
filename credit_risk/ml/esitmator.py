@@ -78,19 +78,19 @@ class CreditRiskEstimator:
             logging.info("Starting transformation process...")
             model = self.get_model()
             logging.info("Model loaded successfully.")
+            # print("loading the model stages.....")
+            # print(model.stages)
             
             # Log the input DataFrame schema
             logging.info("Input DataFrame schema:")
             # for index, stage in enumerate(model.stages):
             #     print("applying",stage)
             #     dataframe.printSchema()
-            #     df = stage.transform(dataframe)
-            #     df.printSchema()
-            #     print("successful",stage)
-          
-            dataframe.printSchema()
+            #     dataframe = stage.transform(dataframe)
+            #     dataframe.printSchema()
+            #     print("successful",stage)  
             transformed_df = model.transform(dataframe)
-            dataframe.printSchema()
+        
 
             # Log the output DataFrame schema
             logging.info("Output DataFrame schema after transformation:")

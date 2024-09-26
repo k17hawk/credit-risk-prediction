@@ -169,3 +169,6 @@ notebook/feature_engineering.ipynb
 artifact/
 notebook/jar_file
 saved_models/
+data/parq*
+data/arch*
+data/output*

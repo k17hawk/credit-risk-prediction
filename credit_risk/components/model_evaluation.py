@@ -76,6 +76,8 @@ class ModelEvaluation:
             best_model_path = self.model_resolver.get_best_model_path() 
 
             best_model_dataframe = self.credit_estimator.transform(dataframe)
+            
+    
             print("applying pipeline completed..")
 
             #prediction using trained model
@@ -83,6 +85,8 @@ class ModelEvaluation:
             trained_model_dataframe = trained_model.transform(dataframe)
 
             print("pipeline executed successfully...")
+
+     
 
             #compute f1 score for trained model
             trained_model_f1_score = get_score(dataframe=trained_model_dataframe, metric_name="f1",
@@ -92,6 +96,9 @@ class ModelEvaluation:
             best_model_f1_score = get_score(dataframe=best_model_dataframe, metric_name="f1",
                                             label_col=self.schema.target_column,
                                             prediction_col=self.schema.prediction_column_name)
+            
+            print(f"Trained_model_f1_score: {trained_model_f1_score}, Best model f1 score: {best_model_f1_score}")
+            print("no error")
 
             logger.info(f"Trained_model_f1_score: {trained_model_f1_score}, Best model f1 score: {best_model_f1_score}")
             #improved accuracy

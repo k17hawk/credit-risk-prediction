@@ -36,6 +36,15 @@ class CreditRiskDataSchema:
         self.col_encoded_age_group = 'encoded_age_group'
         self.col_encoded_loan_amount_group = 'encoded_loan_amount_group'
 
+        #indexed
+        self.col_indexed_cb_person_default_on_file = "indexed_cb_person_default_on_file"
+        self.col_indexed_person_home_ownership = "indexed_person_home_ownership"
+        self.col_indexed_loan_intent = "indexed_loan_intent"
+        self.col_indexed_loan_grade = "indexed_loan_grade"
+        self.col_indexed_income_group = "indexed_income_group"
+        self.col_indexed_age_group = "indexed_age_group"
+        self.col_indexed_loan_amount_group = "indexed_loan_amount_group"
+
         #scaled
         self.col_scaled_person_age = 'scaled_person_age' 
         self.col_scaled_person_income = 'scaled_person_income'
@@ -174,6 +183,20 @@ class CreditRiskDataSchema:
         return features
     
     @property
+    def string_indexer_one_hot_features(self) -> List[str]:
+        features  = [
+        self.col_indexed_cb_person_default_on_file,
+        self.col_indexed_person_home_ownership,
+        self.col_indexed_loan_intent ,
+        self.col_indexed_loan_grade,
+        self.col_indexed_income_group,
+        self.col_indexed_age_group,
+        self.col_indexed_loan_amount_group,
+
+        ]
+        return features
+    
+    @property
     def required_scaling_columns(self) -> List[str]:
         features  =[self.col_person_age,
                     self.col_person_income,
@@ -221,7 +244,6 @@ class CreditRiskDataSchema:
             self.col_person_emp_length,
             self.col_loan_amnt,
             self.col_loan_int_rate,
-            self.col_loan_status,
             self.col_loan_percent_income,
             self.col_loan_to_income_ratio,
             self.col_loan_to_emp_length_ratio,
@@ -243,6 +265,10 @@ class CreditRiskDataSchema:
     @property
     def prediction_column_name(self) -> str:
         return "prediction"
+    
+    @property
+    def target_indexed_label(self) -> str:
+        return f"indexed_{self.target_column}"
 
     @property
     def prediction_label_column_name(self) -> str:
