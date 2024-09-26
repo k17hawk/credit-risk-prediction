@@ -66,7 +66,7 @@ class ModelTrainer:
             stages = []
             logger.info("Creating Random Forest Classifier class.")
             random_forest_clf = RandomForestClassifier(labelCol=self.schema.target_column,
-                                                       featuresCol="features")
+                                                       featuresCol=self.schema.min_max_features)
             stages.append(random_forest_clf)
             pipeline = Pipeline(stages=stages)
             return pipeline

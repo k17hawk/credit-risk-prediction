@@ -1,1 +1,0 @@
-{"class":"org.apache.spark.ml.feature.OneHotEncoderModel","timestamp":1727298739847,"sparkVersion":"3.1.1","uid":"OneHotEncoder_3b9e1ad15419","paramMap":{"outputCols":["person_home_ownership_ohe"],"inputCols":["person_home_ownership_index"]},"defaultParamMap":{"outputCol":"OneHotEncoder_3b9e1ad15419__output","dropLast":true,"handleInvalid":"error"}}
