@@ -14,16 +14,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Darkened background */
+            background: rgba(0, 0, 0, 0.5); 
             z-index: 1000;
         }
-
-        /* Background content blur (excluding spinner) */
         .blurred {
             filter: blur(5px);
         }
 
-        /* Large spinner in the center */
         #loadingSpinner {
             position: fixed;
             top: 50%;
@@ -31,24 +28,22 @@
             transform: translate(-50%, -50%);
             width: 150px;
             height: 150px;
-            border: 16px solid rgba(0, 0, 0, 0.2);  /* Light border */
-            border-top: 16px solid #007bff;  /* Blue border for rotating part */
+            border: 16px solid rgba(0, 0, 0, 0.2);  
+            border-top: 16px solid #007bff;  
             border-radius: 50%;
             animation: spin 2s linear infinite;
-            z-index: 1100; /* Keep it above the blur */
+            z-index: 1100; 
         }
 
-        /* Keyframes for rotating the spinner */
         @keyframes spin {
             0% {
                 transform: translate(-50%, -50%) rotate(0deg);
             }
             100% {
-                transform: translate(-50%, -50%) rotate(360deg);  /* Full rotation */
+                transform: translate(-50%, -50%) rotate(360deg); 
             }
         }
 
-        /* Modal styles */
         #resultModal {
             display: none;
             position: fixed;
@@ -133,7 +128,7 @@
             background-color: #218838;
         }
 
-        /* Responsive Styles */
+
         @media (max-width: 600px) {
             .container {
                 width: 90%;
@@ -250,12 +245,12 @@
                 <input type="submit" value="Submit">
             </div>
         </form>
-      <!-- Loading Overlay with Spinner -->
+
       <div id="loadingOverlay">
         <div id="loadingSpinner"></div>
     </div>
 
-    <!-- Modal for displaying loan status -->
+
     <div id="resultModal">
         <h2 id="loanStatus"></h2>
         <button id="closeModalBtn">Cancel</button>
@@ -263,51 +258,47 @@
 
     <script>
         $(document).ready(function() {
-            // Handle form submission via AJAX
+            
             $('#loanForm').on('submit', function(e) {
-                e.preventDefault();  // Prevent the default form submission
+                e.preventDefault();  
 
-                // Disable the submit button and show the loading overlay
+                
                 $('#submitBtn').attr('disabled', true);
                 $('#loadingOverlay').show();
-                $('.container').addClass('blurred'); // Blur the background
-
-                // Collect form data
+                $('.container').addClass('blurred'); 
+       
                 var formData = $(this).serialize();
 
-                // Send the form data via AJAX
+
                 $.ajax({
-                    url: '/submit',  // Flask route to handle the form submission
+                    url: '/submit', 
                     type: 'POST',
                     data: formData,
                     success: function(response) {
-                        // Hide the loading overlay
+  
                         $('#loadingOverlay').hide();
-                        $('.container').removeClass('blurred'); // Remove blur
+                        $('.container').removeClass('blurred'); 
 
-                        // Display the loan status in the modal
+           
                         $('#loanStatus').text(response.loan_status);
                         $('#resultModal').fadeIn();
 
-                        // Re-enable the submit button
                         $('#submitBtn').attr('disabled', false);
                     },
                     error: function(error) {
-                        // Handle any errors that occur during the AJAX request
+                        
                         $('#loadingOverlay').hide();
-                        $('.container').removeClass('blurred'); // Remove blur
+                        $('.container').removeClass('blurred'); 
 
-                        // Display an error message in the modal
                         $('#loanStatus').text('An error occurred. Please try again.');
                         $('#resultModal').fadeIn();
 
-                        // Re-enable the submit button
+                     
                         $('#submitBtn').attr('disabled', false);
                     }
                 });
             });
 
-            // Close modal and reset form when Cancel button is clicked
             $('#closeModalBtn').on('click', function() {
                 $('#resultModal').fadeOut();
                 $('#loanForm')[0].reset();  
