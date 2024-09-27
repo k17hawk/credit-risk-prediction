@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Loan Application Form</title>
+    <style>
+
+#loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Darkened background */
+            z-index: 1000;
+        }
+
+        /* Background content blur (excluding spinner) */
+        .blurred {
+            filter: blur(5px);
+        }
+
+        /* Large spinner in the center */
+        #loadingSpinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            border: 16px solid rgba(0, 0, 0, 0.2);  /* Light border */
+            border-top: 16px solid #007bff;  /* Blue border for rotating part */
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            z-index: 1100; /* Keep it above the blur */
+        }
+
+        /* Keyframes for rotating the spinner */
+        @keyframes spin {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);  /* Full rotation */
+            }
+        }
+
+        /* Modal styles */
+        #resultModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1200;
+            text-align: center;
+        }
+
+        #resultModal h2 {
+            margin-bottom: 20px;
+        }
+
+        #resultModal button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        #resultModal button:hover {
+            background-color: #0056b3;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .form-group input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .form-group input[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 15px;
+            }
+
+            .form-group input,
+            .form-group select {
+                font-size: 14px;
+            }
+
+            .form-group input[type="submit"] {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Loan Application Form</h2>
+        <form id="loanForm" method="POST">
+            <!-- Person Age -->
+            <div class="form-group">
+                <label for="person_age">Person Age</label>
+                <input type="number" id="person_age" name="person_age" required>
+            </div>
+
+            <!-- Person Income -->
+            <div class="form-group">
+                <label for="person_income">Person Income</label>
+                <input type="number" id="person_income" name="person_income" required>
+            </div>
+
+            <!-- Person Home Ownership -->
+            <div class="form-group">
+                <label for="person_home_ownership">Person Home Ownership</label>
+                <select id="person_home_ownership" name="person_home_ownership" required>
+                    <option value="OWN">OWN</option>
+                    <option value="RENT">RENT</option>
+                    <option value="MORTGAGE">MORTGAGE</option>
+                    <option value="OTHER">OTHER</option>
+                </select>
+            </div>
+
+            <!-- Person Employment Length -->
+            <div class="form-group">
+                <label for="person_emp_length">Person Employment Length</label>
+                <input type="number" id="person_emp_length" name="person_emp_length" required>
+            </div>
+
+            <!-- Loan Intent -->
+            <div class="form-group">
+                <label for="loan_intent">Loan Intent</label>
+                <select id="loan_intent" name="loan_intent" required>
+                    <option value="PERSONAL">PERSONAL</option>
+                    <option value="EDUCATION">EDUCATION</option>
+                    <option value="MEDICAL">MEDICAL</option>
+                    <option value="VENTURE">VENTURE</option>
+                    <option value="HOMEIMPROVEMENT">HOMEIMPROVEMENT</option>
+                    <option value="DEBTCONSOLIDATION">DEBT CONSOLIDATION</option>
+                </select>
+            </div>
+
+            <!-- Loan Grade -->
+            <div class="form-group">
+                <label for="loan_grade">Loan Grade</label>
+                <select id="loan_grade" name="loan_grade" required>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                </select>
+            </div>
+
+            <!-- Loan Amount -->
+            <div class="form-group">
+                <label for="loan_amnt">Loan Amount</label>
+                <input type="number" id="loan_amnt" name="loan_amnt" required>
+            </div>
+
+            <!-- Loan Interest Rate -->
+            <div class="form-group">
+                <label for="loan_int_rate">Loan Interest Rate (%)</label>
+                <input type="number" step="0.01" id="loan_int_rate" name="loan_int_rate" required>
+            </div>
+
+            <!-- Loan Percent Income -->
+            <div class="form-group">
+                <label for="loan_percent_income">Loan Percent of Income (%)</label>
+                <input type="number" step="0.01" id="loan_percent_income" name="loan_percent_income" required>
+            </div>
+
+            <!-- CB Person Default on File -->
+            <div class="form-group">
+                <label for="cb_person_default_on_file">CB Person Default on File</label>
+                <select id="cb_person_default_on_file" name="cb_person_default_on_file" required>
+                    <option value="Y">Yes</option>
+                    <option value="N">No</option>
+                </select>
+            </div>
+
+            <!-- CB Person Credit History Length -->
+            <div class="form-group">
+                <label for="cb_person_cred_hist_length">CB Person Credit History Length (Years)</label>
+                <input type="number" id="cb_person_cred_hist_length" name="cb_person_cred_hist_length" required>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group">
+                
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+      <!-- Loading Overlay with Spinner -->
+      <div id="loadingOverlay">
+        <div id="loadingSpinner"></div>
+    </div>
+
+    <!-- Modal for displaying loan status -->
+    <div id="resultModal">
+        <h2 id="loanStatus"></h2>
+        <button id="closeModalBtn">Cancel</button>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Handle form submission via AJAX
+            $('#loanForm').on('submit', function(e) {
+                e.preventDefault();  // Prevent the default form submission
+
+                // Disable the submit button and show the loading overlay
+                $('#submitBtn').attr('disabled', true);
+                $('#loadingOverlay').show();
+                $('.container').addClass('blurred'); // Blur the background
+
+                // Collect form data
+                var formData = $(this).serialize();
+
+                // Send the form data via AJAX
+                $.ajax({
+                    url: '/submit',  // Flask route to handle the form submission
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        // Hide the loading overlay
+                        $('#loadingOverlay').hide();
+                        $('.container').removeClass('blurred'); // Remove blur
+
+                        // Display the loan status in the modal
+                        $('#loanStatus').text(response.loan_status);
+                        $('#resultModal').fadeIn();
+
+                        // Re-enable the submit button
+                        $('#submitBtn').attr('disabled', false);
+                    },
+                    error: function(error) {
+                        // Handle any errors that occur during the AJAX request
+                        $('#loadingOverlay').hide();
+                        $('.container').removeClass('blurred'); // Remove blur
+
+                        // Display an error message in the modal
+                        $('#loanStatus').text('An error occurred. Please try again.');
+                        $('#resultModal').fadeIn();
+
+                        // Re-enable the submit button
+                        $('#submitBtn').attr('disabled', false);
+                    }
+                });
+            });
+
+            // Close modal and reset form when Cancel button is clicked
+            $('#closeModalBtn').on('click', function() {
+                $('#resultModal').fadeOut();
+                $('#loanForm')[0].reset();  
+            });
+        });
+    </script>
+    </body>
+    </html>
+    

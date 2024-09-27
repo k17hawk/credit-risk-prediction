@@ -9,7 +9,6 @@ from credit_risk.constant import TIMESTAMP
 from pyspark.sql import DataFrame
 from datetime import datetime
 from credit_risk.config.spark_manager import spark_session
-TIMESTAMP = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 from pyspark.sql.functions import col
 from pyspark.sql.types import FloatType
 class Prediction:
