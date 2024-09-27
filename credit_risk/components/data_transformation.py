@@ -21,45 +21,11 @@ from pyspark.ml.util import DefaultParamsReadable, DefaultParamsWritable
 from pyspark.ml.param.shared import Param
 from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
-from pyspark.ml import Pipeline, PipelineModel
+from pyspark.ml import Pipeline
 from pyspark.ml.feature import StringIndexer, OneHotEncoder
 from pyspark.sql import DataFrame
 
 
-# class CustomOneHotEncoder(Transformer, DefaultParamsWritable, DefaultParamsReadable):
-#     def __init__(self, input_cols=None, output_cols=None):
-#         super(CustomOneHotEncoder, self).__init__()
-#         self.input_cols = Param(self, "input_cols", "")
-#         self.output_cols = Param(self, "output_cols", "")
-
-#         self._setDefault(input_cols=[], output_cols=[])
-
-#         if input_cols is not None:
-#             self._set(input_cols=input_cols)
-#         if output_cols is not None:
-#             self._set(output_cols=output_cols)
-
-#     def _transform(self, df: DataFrame) -> DataFrame:
-#         input_cols = self.getOrDefault(self.input_cols)
-#         output_cols = self.getOrDefault(self.output_cols)
-
-#         # Apply StringIndexer
-#         indexers = [StringIndexer(inputCol=col, outputCol=f"{col}_index") for col in input_cols]
-#         for indexer in indexers:
-#             df = indexer.fit(df).transform(df)
-
-#         # Apply OneHotEncoder
-#         encoders = [OneHotEncoder(inputCols=[f"{col}_index"], outputCols=[output_col]) for col, output_col in zip(input_cols, output_cols)]
-#         for encoder in encoders:
-#             df = encoder.fit(df).transform(df)
-
-#         for col in input_cols:
-#             df = df.drop(col)
-#         for col in [f"{col}_index" for col in input_cols]:
-#             df = df.drop(col)
-
-
-#         return df
 
 
 class DataTransformation:

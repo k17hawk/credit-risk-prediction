@@ -55,7 +55,7 @@ class Prediction:
             raise CreditRiskException(e, sys)
     
     def drop_vector_columns(self,df: DataFrame) -> DataFrame:
-        # Identify vector columns
+
         vector_columns = [col for col in df.columns if df.schema[col].dataType.typeName() == 'vector']
         double_columns = [col for col in df.columns if df.schema[col].dataType.typeName()=='double']
         
@@ -67,10 +67,9 @@ class Prediction:
 
     def convert_parquet_to_csv(self,parquet_file_path: str, csv_file_path: str):
         try:
-            # Read the Parquet file
+    
             df = spark_session.read.parquet(parquet_file_path)
-        # Convert vector columns to strings and double columns to float
-
+  
             df = self.drop_vector_columns(df)
 
             # Write to CSV
@@ -132,7 +131,7 @@ class Prediction:
                 "prediction"
             ]
 
-            # Apply the cast for each column
+
             for col in columns_to_convert:
                 df = df.withColumn(col, df[col].cast(FloatType()))
 
@@ -151,7 +150,6 @@ class Prediction:
                 "prediction_loan_status"
 
             ]
-            # Drop the vector columns
             df = df.drop(*columns_to_drop)
            
             new_data = df.toPandas()

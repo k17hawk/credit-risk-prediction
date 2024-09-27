@@ -26,15 +26,14 @@ app = Flask(__name__)
 class Application:
     def __init__(self) -> None:
         self.config = BatchPredictionConfig()
-        self.setup_routes()  # Set up routes during initialization
+        self.setup_routes()  
         self.schema = CreditRiskDataSchema()
 
     def setup_routes(self):
-        @app.route('/')  # Define the root route
+        @app.route('/') 
         def form():
-            return render_template('index.html')  # Render the HTML template
-
-        @app.route('/submit', methods=['POST'])  # Define the submit route
+            return render_template('index.html') 
+        @app.route('/submit', methods=['POST']) 
         def submit():
             try:
                 data = {
@@ -126,13 +125,11 @@ class Application:
         except Exception as e:
             return jsonify({"error": str(e)})
         
-
     def run(self):
-        self.app.run(debug=True)  # Run the Flask app
+        self.app.run(debug=True) 
 
-# Create an instance of the Application class
+
 app_instance = Application()  
 
-# If this script is run directly, start the Flask app
 if __name__ == '__main__':
-    app_instance.run(host='127.0.0.1', port=5003)  # Run on all addresses
+    app_instance.run(host='127.0.0.1', port=5003) 

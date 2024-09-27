@@ -65,12 +65,9 @@ class ModelEvaluation:
             trained_model_file_path = self.model_trainer_artifact.model_trainer_ref_artifact.trained_model_file_path
             trained_model = PipelineModel.load(trained_model_file_path)
 
-            #Read the dataframe
+
             dataframe: DataFrame = self.read_data()
-            # print("applying LoanAmountCategorizer ")
-            # loan_amount_categorizer = LoanAmountCategorizer(input_col=self.schema.col_loan_amnt,output_col=self.schema.col_loan_amount_group)
-            
-            # dataframe = loan_amount_categorizer.categorize(dataframe)
+
 
             print("applying pipeline to data")
             best_model_path = self.model_resolver.get_best_model_path() 
@@ -80,15 +77,13 @@ class ModelEvaluation:
     
             print("applying pipeline completed..")
 
-            #prediction using trained model
+
             print("applying pipeline from best model")
             trained_model_dataframe = trained_model.transform(dataframe)
 
             print("pipeline executed successfully...")
 
      
-
-            #compute f1 score for trained model
             trained_model_f1_score = get_score(dataframe=trained_model_dataframe, metric_name="f1",
                                             label_col=self.schema.target_column,
                                             prediction_col=self.schema.prediction_column_name)
