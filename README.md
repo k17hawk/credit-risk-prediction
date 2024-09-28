@@ -19,13 +19,13 @@ After implementing the project it was seen that out of different algorithms ofXg
 
 # Required packages
 The codebase has been built with the following languages and tools:
-<ol>
-Python<ol>
-<ol>NumPy<ol>
-<ol>Pandas<ol>
-<ol>Seaborn<ol>
-<ol>Plotly<ol>
-<ol>Pyspark<ol>
-<ol>Scikit-learn<ol>
+
+- Python
+- NumPy
+- Pandas
+- Seaborn
+- Plotly
+- Pyspark
+- Scikit-learn
 
 
