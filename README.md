@@ -27,5 +27,35 @@ The codebase has been built with the following languages and tools:
 - Plotly
 - Pyspark
 - Scikit-learn
+- Flask
+- HTML
+- CSS
+- Jquery
+- Json
+- Mongodb (pymongo)
+
+# Get Started
+To use the project on your local systems use the following steps.
+
+**Prerequisites**
+There are no prerequisites to running the codebase.
+
+**Installation**
+
+1. Clone the repo
+`git clone https://github.com/k17hawk/credit-risk-prediction.git`
+
+2. create a virtual environment
+`conda create -p .conda python==3.10 -y`
+`conda activate ./.conda`
+
+3. Install the requirements
+`pip install -r requirements.txt`
+
+4. Run the app
+`python -m flask --app app run --host=0.0.0.0 --port=5001`
+
+
+
 
 

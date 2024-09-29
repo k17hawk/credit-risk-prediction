@@ -5,3 +5,6 @@ matplotlib
 python-dotenv
 certifi
 pyarrow
+pymongo
+requests
+PyYAML

@@ -7,7 +7,7 @@
     <title>Loan Application Form</title>
     <style>
 
-#loadingOverlay {
+        #loadingOverlay {
             display: none;
             position: fixed;
             top: 0;
@@ -15,9 +15,10 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5); 
-            z-index: 1000;
+          
         }
-        .blurred {
+
+        .blurred-background {
             filter: blur(5px);
         }
 
@@ -32,7 +33,6 @@
             border-top: 16px solid #007bff;  
             border-radius: 50%;
             animation: spin 2s linear infinite;
-            z-index: 1100; 
         }
 
         @keyframes spin {
@@ -73,7 +73,6 @@
         #resultModal button:hover {
             background-color: #0056b3;
         }
-
 
         body {
             font-family: Arial, sans-serif;
@@ -127,7 +126,6 @@
         .form-group input[type="submit"]:hover {
             background-color: #218838;
         }
-
 
         @media (max-width: 600px) {
             .container {
@@ -255,45 +253,37 @@
         <h2 id="loanStatus"></h2>
         <button id="closeModalBtn">Cancel</button>
     </div>
-
     <script>
         $(document).ready(function() {
-            
             $('#loanForm').on('submit', function(e) {
                 e.preventDefault();  
 
-                
                 $('#submitBtn').attr('disabled', true);
                 $('#loadingOverlay').show();
-                $('.container').addClass('blurred'); 
-       
-                var formData = $(this).serialize();
+                $('.container').addClass('blurred-background'); 
 
+                var formData = $(this).serialize();
 
                 $.ajax({
                     url: '/submit', 
                     type: 'POST',
                     data: formData,
                     success: function(response) {
-  
                         $('#loadingOverlay').hide();
-                        $('.container').removeClass('blurred'); 
+                        $('.container').removeClass('blurred-background'); 
 
-           
                         $('#loanStatus').text(response.loan_status);
                         $('#resultModal').fadeIn();
 
                         $('#submitBtn').attr('disabled', false);
                     },
                     error: function(error) {
-                        
                         $('#loadingOverlay').hide();
-                        $('.container').removeClass('blurred'); 
+                        $('.container').removeClass('blurred-background'); 
 
                         $('#loanStatus').text('An error occurred. Please try again.');
                         $('#resultModal').fadeIn();
 
-                     
                         $('#submitBtn').attr('disabled', false);
                     }
                 });
