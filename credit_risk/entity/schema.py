@@ -1,7 +1,4 @@
 from typing import List
-from pyspark.sql.types import (TimestampType, 
-            StringType, FloatType, StructType, StructField)
-from pyspark.sql import DataFrame
 import os, sys
 from typing import Dict
 
@@ -67,39 +64,6 @@ class CreditRiskDataSchema:
                     self.col_int_rate_to_loan_amt_ratio]
         return features
 
-   
-
-        # cb_person_default_on_file columns
-       
-
-
-    @property
-    def dataframe_schema(self) -> StructType:
-        try:
-            schema = StructType([
-                StructField(self.col_person_age, StringType()),
-                StructField(self.col_person_income, StringType()),
-                StructField(self.col_person_emp_length, StringType()),
-                StructField(self.col_loan_amnt, StringType()),
-                StructField(self.col_loan_int_rate, StringType()),
-                StructField(self.col_loan_status, StringType()),
-                StructField(self.col_loan_percent_income, StringType()),
-                StructField(self.col_cb_person_cred_hist_length, StringType()),
-                StructField(self.col_person_home_ownership, StringType()),
-                StructField(self.col_loan_intent, StringType()),
-                StructField(self.col_loan_grade, StringType()),
-                StructField(self.col_cb_person_default_on_file, StringType()),
-                StructField(self.col_loan_to_income_ratio, StringType()),
-                StructField(self.col_loan_to_emp_length_ratio, StringType()),
-                StructField(self.col_int_rate_to_loan_amt_ratio, StringType()),
-                StructField(self.col_income_group, StringType()),
-                StructField(self.col_age_group, StringType()),
-                StructField(self.col_loan_amount_group, StringType()),
-
-            ])
-            return schema
-        except Exception as e:
-            raise e
         
     @property
     def target_column(self) -> str:
@@ -285,6 +249,5 @@ class CreditRiskDataSchema:
 
         
     
-
 
 

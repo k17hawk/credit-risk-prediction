@@ -1,0 +1,13 @@
+from datetime import datetime
+from scikit_credit_risk.entity import DataIngestionConfig,DataIngestionArtifact
+from scikit_credit_risk.entity.config_entity import DataValidationConfig
+from scikit_credit_risk.components.data_validation import DataValidation
+from scikit_credit_risk.entity.config_entity import  TrainingPipelineConfig
+from scikit_credit_risk.exception import CreditRiskException
+from scikit_credit_risk.components.data_ingestion import DataIngestion
+import os
+from scikit_credit_risk.pipeline.training import TrainingPipeline
+
+training_pipeline_config = TrainingPipelineConfig()
+tr = TrainingPipeline(training_pipeline_config=training_pipeline_config)
+tr.start() 

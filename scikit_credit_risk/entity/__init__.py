@@ -1,0 +1,2 @@
+from credit_risk.entity.artifact_entity import DataIngestionArtifact
+from credit_risk.entity.config_entity import DataIngestionConfig
