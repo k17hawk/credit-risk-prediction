@@ -181,6 +181,10 @@ class CreditRiskDataSchema:
         ]
         return features
     
+    def required_oneHot_features(self) -> List[str]:
+        features = self.one_hot_encoding_features + self.one_hot_encoding_features_derived
+        return features
+    
   
 
 
@@ -196,9 +200,7 @@ class CreditRiskDataSchema:
     
 
     
-    def required_oneHot_features(self) -> List[str]:
-        features = self.one_hot_encoding_features + self.one_hot_encoding_features_derived
-        return features
+    
     
 
     

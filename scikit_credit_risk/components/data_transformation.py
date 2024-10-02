@@ -177,8 +177,7 @@ class DataTransformation:
             transformed_trained_dataframe = upsampler.upsample()
 
             # Display the first few rows
-            print(transformed_trained_dataframe['loan_status'].value_counts())
-          
+ 
             # transformed_trained_dataframe.printSchema()
 
 
@@ -212,17 +211,13 @@ class DataTransformation:
 
             logger.info(f"Saving transformed train data at: [{transformed_train_data_file_path}]")
             print(transformed_trained_dataframe.shape,len(transformed_trained_dataframe.columns))
-            print("column in transformed_trained_dataframe",transformed_trained_dataframe.columns)
             transformed_trained_dataframe.to_parquet(transformed_train_data_file_path,engine="pyarrow")
 
             logger.info(f"Saving transformed test data at: [{transformed_test_data_file_path}]")
             print(transformed_test.shape,len(transformed_test.columns))
-            print("columns in transformed_test",transformed_test.columns)
-            
+ 
             transformed_test.to_parquet(transformed_test_data_file_path,engine="pyarrow")
-            print('file path:')
-            print(transformed_train_data_file_path)
-            print(type(transformed_train_data_file_path))
+   
 
 
             data_tf_artifact = DataTransformationArtifact(

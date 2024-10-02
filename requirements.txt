@@ -10,7 +10,8 @@ requests
 PyYAML
 ipykernel
 scikit-learn
-
+imblearn
+dill
 azure-mgmt-compute
 azure-mgmt-storage
 azure-mgmt-resource
