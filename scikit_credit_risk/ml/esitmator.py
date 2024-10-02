@@ -1,6 +1,5 @@
 import sys
-from pyspark.ml.pipeline import PipelineModel
-from pyspark.sql import DataFrame
+import joblib
 import shutil
 import os
 import time
@@ -11,7 +10,7 @@ from credit_risk.logger import logging
 from credit_risk.entity.schema import CreditRiskDataSchema
 MODEL_SAVED_DIR="saved_models"
 MODEL_NAME="credit_risk_estimator"
-
+import pandas as pd
 
 class ModelResolver:
 
@@ -62,18 +61,18 @@ class CreditRiskEstimator:
         except Exception as e:
             raise e
 
-    def get_model(self) -> PipelineModel:
+    def get_model(self):
         try:
             latest_model_path = self.model_resolver.get_best_model_path()
             if latest_model_path != self.loaded_model_path:
-                self.__loaded_model = PipelineModel.load(latest_model_path)
+                self.__loaded_model = joblib.load(latest_model_path)
                 self.loaded_model_path = latest_model_path
             return self.__loaded_model
         except Exception as e:
             raise e
 
 
-    def transform(self, dataframe: DataFrame) -> DataFrame:
+    def transform(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         try:
             logging.info("Starting transformation process...")
             model = self.get_model()

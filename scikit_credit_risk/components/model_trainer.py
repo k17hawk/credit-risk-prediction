@@ -177,10 +177,12 @@ class ModelTrainer:
                                                                      precision_score=test_weightedPrecision,
                                                                      recall_score=test_weightedRecall)
             logger.info(f"Model trainer test metric: {test_metric_artifact}")
+            
             ref_artifact = self.export_trained_model(model=trained_model)
             model_trainer_artifact = ModelTrainerArtifact(model_trainer_ref_artifact=ref_artifact,
                                                           model_trainer_train_metric_artifact=train_metric_artifact,
                                                           model_trainer_test_metric_artifact=test_metric_artifact)
+            
             self.model_trainer_artifact_data.save_model_artifact(model_trainer_artifact=model_trainer_artifact)
 
             logger.info(f"Model trainer artifact: {model_trainer_artifact}")

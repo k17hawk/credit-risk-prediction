@@ -85,7 +85,7 @@ def load_object(file_path:str):
     except Exception as e:
         raise CreditRiskException(e,sys) from e
 
-def get_score(model, X_train, y_train, X_test, y_test, metric_name = ['f1', 'weightedPrecision', 'weightedRecall', 'accuracy']) -> float:
+def get_score(model, X_train, y_train, X_test, y_test, metric_name ) -> float:
     try:
         train_pred = model.predict(X_train)
         

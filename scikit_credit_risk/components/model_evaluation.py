@@ -1,21 +1,18 @@
-from credit_risk.entity.artifact_entity import (ModelEvaluationArtifact, DataValidationArtifact,
+from scikit_credit_risk.entity.artifact_entity import (ModelEvaluationArtifact, DataValidationArtifact,
     ModelTrainerArtifact)
-from credit_risk.entity.config_entity import ModelEvaluationConfig
-from credit_risk.entity.schema import CreditRiskDataSchema
-from credit_risk.exception import CreditRiskException
-from credit_risk.logger import logging as logger
+from scikit_credit_risk.entity.config_entity import ModelEvaluationConfig
+from scikit_credit_risk.entity.schema import CreditRiskDataSchema
+from scikit_credit_risk.exception import CreditRiskException
+from scikit_credit_risk.logger import logging as logger
 import sys
-from pyspark.sql import DataFrame
-from pyspark.ml.feature import StringIndexerModel
-from pyspark.ml.pipeline import PipelineModel
-from credit_risk.config.spark_manager import spark_session
-from credit_risk.utils import get_score
-from credit_risk.ml.features import LoanAmountCategorizer
 
-from credit_risk.data_access.model_eval_artifcat import ModelEvaluationArtifactData
-from credit_risk.ml.esitmator import  ModelResolver,CreditRiskEstimator
+from scikit_credit_risk.utils import get_score
 
- 
+from scikit_credit_risk.data_access.model_eval_artifcat import ModelEvaluationArtifactData
+from scikit_credit_risk.ml.esitmator import  ModelResolver,CreditRiskEstimator
+import pandas as pd
+import joblib
+
 class ModelEvaluation:
 
     def __init__(self,
@@ -35,10 +32,10 @@ class ModelEvaluation:
         except Exception as e:
             raise CreditRiskException(e, sys)
 
-    def read_data(self) -> DataFrame:
+    def read_data(self) -> pd.DataFrame:
         try:
             file_path = self.data_validation_artifact.accepted_file_path
-            dataframe: DataFrame = spark_session.read.parquet(file_path)
+            dataframe: pd.DataFrame = pd.read_parquet(file_path,engine="pyarrow")
             return dataframe
         except Exception as e:
             # Raising an exception.
@@ -63,10 +60,11 @@ class ModelEvaluation:
 
             #obtain required directory path
             trained_model_file_path = self.model_trainer_artifact.model_trainer_ref_artifact.trained_model_file_path
-            trained_model = PipelineModel.load(trained_model_file_path)
+            trained_model = joblib.load(trained_model_file_path)
 
 
-            dataframe: DataFrame = self.read_data()
+
+            dataframe: pd.DataFrame = self.read_data()
 
 
             print("applying pipeline to data")

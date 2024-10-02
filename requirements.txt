@@ -19,3 +19,14 @@ azure-keyvault-secrets
 azure-storage-blob
 azureml
 azureml-core
+
+langchain
+langchain-community 
+langchain-core
+PyMySQL
+sqlalchemy 
+langchain-groq
+streamlit
+pandasai
+langgraph
+langchain-experimental
