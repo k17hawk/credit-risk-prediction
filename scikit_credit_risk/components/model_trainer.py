@@ -13,6 +13,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier 
 import joblib
+from scikit_credit_risk.utils import load_numpy_array_data,save_object
 import numpy as np
 class ModelTrainer:
 
@@ -27,15 +28,16 @@ class ModelTrainer:
         self.model_trainer_config = model_trainer_config
         self.schema = schema
 
-    def get_train_test_dataframe(self) -> List[pd.DataFrame]:
+    def get_train_test_dataframe(self):
         try:
             
             test_file_path = self.data_transformation_artifact.transformed_test_file_path
             train_file_path = self.data_transformation_artifact.transformed_train_file_path
-            train_dataframe: pd.DataFrame = pd.read_parquet(train_file_path)
-            test_dataframe: pd.DataFrame = pd.read_parquet(test_file_path)
-            dataframes: List[pd.DataFrame] = [train_dataframe, test_dataframe]
-            return dataframes
+
+            train_dataframe: pd.DataFrame = load_numpy_array_data(file_path=train_file_path)
+            test_dataframe: pd.DataFrame = load_numpy_array_data(file_path=test_file_path)
+           
+            return train_dataframe,test_dataframe
         except Exception as e:
             raise CreditRiskException(e, sys)
 
@@ -122,14 +124,10 @@ class ModelTrainer:
      
             logger.info("Creating trained model directory")
             trained_model_path = self.model_trainer_config.trained_model_file_path
-            os.makedirs(os.path.dirname(trained_model_path), exist_ok=True)
-
-            trained_model_file_path = os.path.join(trained_model_path,'trained_model.pkl')
-            joblib.dump(transformed_pipeline,trained_model_file_path)
-
-
+            save_object(file_path=trained_model_path,obj=transformed_pipeline)
+            
             ref_artifact = PartialModelTrainerRefArtifact(
-                trained_model_file_path=trained_model_file_path,
+                trained_model_file_path=trained_model_path,
                 )
 
             logger.info(f"Model trainer reference artifact: {ref_artifact}")
@@ -141,19 +139,19 @@ class ModelTrainer:
 
     def initiate_model_training(self) -> ModelTrainerArtifact:
         try:
-            dataframes = self.get_train_test_dataframe()
+            logger.info(f"Loading train and  testing dataset")
+            train_array,test_array = self.get_train_test_dataframe()
 
-            train_dataframe, test_dataframe = dataframes[0], dataframes[1]
+            logger.info(f"Splitting training and testing input and target feature")
+            x_train,y_train,x_test,y_test = train_array[:,:-1],train_array[:,-1],test_array[:,:-1],test_array[:,-1]
 
-            X_train = train_dataframe.drop([self.schema.target_column], axis=1)
-            y_train = train_dataframe[self.schema.target_column]
+            logger.info(f"Extracting model config file path")
 
-            X_test = test_dataframe.drop([self.schema.target_column], axis=1)
-            y_test = test_dataframe[self.schema.target_column]
 
             model = self.get_model()
-            trained_model = model.fit(X_train,y_train)
-            scores = self.get_scores(model, X_train, y_train, X_test, y_test,metric_name=self.model_trainer_config.metric_list)
+            trained_model = model.fit(x_train,y_train)
+            
+            scores = self.get_scores(model, x_train, y_train, x_test, y_test,metric_name=self.model_trainer_config.metric_list)
 
             train_f1 = scores.get('train_f1', None)
             test_f1 = scores.get('test_f1', None)

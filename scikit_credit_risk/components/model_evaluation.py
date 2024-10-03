@@ -11,7 +11,7 @@ from scikit_credit_risk.utils import get_score
 from scikit_credit_risk.data_access.model_eval_artifcat import ModelEvaluationArtifactData
 from scikit_credit_risk.ml.esitmator import  ModelResolver,CreditRiskEstimator
 import pandas as pd
-import joblib
+from scikit_credit_risk.utils import load_object
 
 class ModelEvaluation:
 
@@ -60,7 +60,7 @@ class ModelEvaluation:
 
             #obtain required directory path
             trained_model_file_path = self.model_trainer_artifact.model_trainer_ref_artifact.trained_model_file_path
-            trained_model = joblib.load(trained_model_file_path)
+            trained_model = load_object(trained_model_file_path)
 
 
 

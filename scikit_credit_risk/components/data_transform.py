@@ -4,7 +4,7 @@ from scikit_credit_risk.logger import  logging as logger
 from scikit_credit_risk.entity.artifact_entity import DataValidationArtifact, DataTransformationArtifact
 from scikit_credit_risk.entity.config_entity import DataTransformationConfig
 
-from scikit_credit_risk.ml.features import  AgeGroupCategorizer,IncomeGroupCategorizer,LoanAmountCategorizer,RatioFeatureGenerator,DataCleaner
+from scikit_credit_risk.ml.features import  AgeGroupCategorizer,IncomeGroupCategorizer,LoanAmountCategorizer,RatioFeatureGenerator,DataCleaner,Upsampling
 
 from scikit_credit_risk.constant import AGE_BINS,AGE_LABELS
 from scikit_credit_risk.data_access.data_transformation_artifact import DataTransformationArtifactData
@@ -43,7 +43,7 @@ class DataTransformation:
         except Exception as e:
             raise CreditRiskException(e, sys)
     
-    def get_data_transformation_pipeline(self) -> ColumnTransformer:
+    def get_data_transformation_pipeline(self) -> Pipeline:
         try:
             data_cleaner = DataCleaner(
             age_column=self.schema.col_person_age,
@@ -70,43 +70,34 @@ class DataTransformation:
                 output_col=self.schema.col_loan_amount_group
             )
             ratio_feature_generator = RatioFeatureGenerator()
-            
-            data_cleaner_pipeline  =Pipeline([("data_cleaner",data_cleaner)])
-            age_group_categorizer_pipeline  =Pipeline([("age_group_categorizer",age_group_categorizer)])
-            income_group_categorizer_pipeline  =Pipeline([("income_group_categorizer",income_group_categorizer)])
-            loan_amount_categorizer_pipeline  =Pipeline([("loan_amount_categorizer",loan_amount_categorizer)])
-            ratio_feature_generator_pipeline  =Pipeline([("ratio_feature_generator",ratio_feature_generator)])
-     
-            
-            num_pipeline = Pipeline([
-                ('scaler', MinMaxScaler())]
+
+            # Define the preprocessor with a ColumnTransformer
+            preprocessor = ColumnTransformer(
+                transformers=[
+                    ('num', Pipeline(steps=[
+                        ('imputer', SimpleImputer(strategy='mean')),
+                        ('scaler', MinMaxScaler())
+                    ]), self.schema.required_scaling_columns),
+                    
+                    ('cat', Pipeline(steps=[
+                        ('imputer', SimpleImputer(strategy='most_frequent')),
+                        ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
+                    ]), self.schema.required_oneHot_features())
+                ],
+                remainder='passthrough'  
             )
 
-            cat_pipeline = Pipeline(
-                steps=[
-                ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False)),
-                ('scaler',MinMaxScaler())
-                ]
-            )
+            # Final pipeline combining all steps
+            pipeline_steps = Pipeline(steps=[
+                ("data_cleaner", data_cleaner),
+                ("age_group_categorizer", age_group_categorizer),
+                ("income_group_categorizer", income_group_categorizer),
+                ("loan_amount_categorizer", loan_amount_categorizer),
+                ("ratio_feature_generator",ratio_feature_generator),
+                ("preprocessor", preprocessor)
+            ])
 
-            # Build the ColumnTransformer with specific column mapping
-            preprocessing = ColumnTransformer([
-                ('data_cleaner_pipeline', data_cleaner_pipeline, [self.schema.col_person_age, self.schema.col_person_emp_length]),  # Specify columns for data cleaner
-                ('age_group_categorizer_pipeline', age_group_categorizer_pipeline, [self.schema.col_person_age]),  # Specify column for age group categorization
-                ('income_group_categorizer_pipeline', income_group_categorizer_pipeline, [self.schema.col_person_income]),  # Specify column for income group
-                ('loan_amount_categorizer_pipeline', loan_amount_categorizer_pipeline, [self.schema.col_loan_amnt]),  # Specify column for loan amount
-                ('ratio_feature_generator_pipeline', ratio_feature_generator_pipeline, [
-                    self.schema.col_loan_amnt, 
-                    self.schema.col_person_income, 
-                    self.schema.col_person_emp_length, 
-                    self.schema.col_loan_int_rate
-                    ]
-                ), 
-                ('num_pipeline', num_pipeline, self.schema.required_scaling_columns),  # Specify numeric columns for scaling
-                # ('cat_pipeline', cat_pipeline, self.schema.required_oneHot_features())  # Specify categorical columns for one-hot encoding
-            ], remainder='passthrough')
-
-            return preprocessing
+            return pipeline_steps
         except Exception as e:
             raise CreditRiskException(e,sys)
 
@@ -114,6 +105,7 @@ class DataTransformation:
         try:
             dataframe: pd.DataFrame = self.read_data()
             logger.info(f"Number of rows: [{dataframe.shape[0]}] and columns: [{dataframe.shape[1]}]")
+       
 
             test_size = self.data_tf_config.test_size
             logger.info(f"Splitting dataset into train and test set using ratio: {1 - test_size}:{test_size}")
@@ -130,36 +122,37 @@ class DataTransformation:
             
 
             logger.info(f"Applying preprocessing object on training dataframe and testing dataframe")
-            input_feature_train_arr=preprocessing_obj.fit_transform(input_feature_train_df)
-            transformed_columns = []
+            transformed_pipeline=preprocessing_obj.fit(input_feature_train_df)
+            column_transformer = transformed_pipeline.named_steps['preprocessor']
 
-            for name, pipeline, columns in preprocessing_obj.transformers_:
-                if name != 'remainder':
-                    # For pipelines with transformers
-                    if hasattr(pipeline, 'get_feature_names_out'):
-                        transformed_columns.extend(pipeline.get_feature_names_out(columns))
-                    else:
-                        transformed_columns.extend(columns)
-                else:
-                    # Handle remainder columns, which pass through unchanged
-                    transformed_columns.extend(columns)
+            feature_names = column_transformer.get_feature_names_out()
 
-            # Create a DataFrame with transformed columns
-            transformed_df = pd.DataFrame(input_feature_train_arr, columns=transformed_columns)
+            input_feature_train_arr =preprocessing_obj.fit_transform(input_feature_train_df)
 
-            # Inspect the resulting transformed DataFrame with new column names
-            print(transformed_df.head())
+            transformed_train_df = pd.DataFrame(input_feature_train_arr,columns = feature_names)
+            target__feature_train_df = target_feature_train_df.reset_index(drop=True)
+    
+            train_data = pd.concat([transformed_train_df, target__feature_train_df], axis=1)
 
-            # smote = SMOTE(sampling_strategy='minority')
-            # X_resampled, y_resampled = smote.fit_resample(input_feature_train_arr, target_feature_train_df)
-            
+            logger.info("upsampling the mninority data")
+            upsampler = Upsampling(target_column=self.schema.target_column)
+
+            # Fit the upsampling model to the DataFrame
+            upsampler.fit(train_data)
+
+            transformed_trained_dataframe = upsampler.upsample()
+            train_arr = np.c_[transformed_trained_dataframe]
+  
 
             input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
 
+            transformed_test_df  =  pd.DataFrame(input_feature_test_arr,columns = feature_names)
+            target__feature_test_df = target_feature_test_df.reset_index(drop=True)
+            test_data = pd.concat([transformed_test_df, target__feature_test_df], axis=1)
+        
 
-            train_arr = np.c_[input_feature_train_arr,target_feature_train_df]
-
-            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
+            test_arr = np.c_[test_data]
+   
 
             os.makedirs(self.data_tf_config.transformation_train_dir,exist_ok=True)
             os.makedirs(self.data_tf_config.transformation_test_dir,exist_ok=True)
@@ -185,7 +178,7 @@ class DataTransformation:
             save_numpy_array_data(file_path=transformed_test_file_path,array=test_arr)
 
             export_pipeline_file_path = os.path.join(self.data_tf_config.export_pipeline_dir)
-            os.makedirs(export_pipeline_file_path,exist_ok=True)
+
             logger.info(f"Saving preprocessing object.")
             save_object(file_path=export_pipeline_file_path,obj=preprocessing_obj)
 

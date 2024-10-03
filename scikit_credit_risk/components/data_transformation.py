@@ -223,7 +223,7 @@ class DataTransformation:
             data_tf_artifact = DataTransformationArtifact(
                 transformed_train_file_path=transformed_train_data_file_path,
                 transformed_test_file_path=transformed_test_data_file_path,
-                exported_pipeline_file_path=export_pipeline_file_path
+                exported_pipeline_file_path=pipeline_file_path
             )
             self.data_transformation_data.save_transformation_artifact(data_transformation_artifact=data_tf_artifact)
             logger.info(f"{'>>' * 20} Data Transformation completed.{'<<' * 20}")

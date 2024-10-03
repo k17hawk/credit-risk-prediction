@@ -6,10 +6,10 @@ from scikit_credit_risk.entity.artifact_entity import DataValidationArtifact
 from scikit_credit_risk.entity.config_entity import  TrainingPipelineConfig,DataTransformationConfig
 from scikit_credit_risk.exception import CreditRiskException
 from scikit_credit_risk.components.data_ingestion import DataIngestion
-from scikit_credit_risk.components.data_transformation import DataTransformation
+from scikit_credit_risk.components.data_transform import DataTransformation
 from scikit_credit_risk.components.model_evaluation import ModelEvaluation
 from scikit_credit_risk.components.model_trainer import ModelTrainer
-# from scikit_credit_risk.components.model_pusher import ModelPusher
+from scikit_credit_risk.components.model_pusher import ModelPusher
 from scikit_credit_risk.entity.artifact_entity import DataTransformationArtifact,ModelTrainerArtifact,ModelEvaluationArtifact,ModelPusherArtifact
 import os
 import os,sys
@@ -65,27 +65,27 @@ class TrainingPipeline:
         except Exception as e:
             raise CreditRiskException(e, sys)
     
-    # def start_model_evaluation(self, data_validation_artifact, model_trainer_artifact) -> ModelEvaluationArtifact:
-    #     try:
-    #         model_eval_config = ModelEvaluationConfig(training_pipeline_config=self.training_pipeline_config)
-    #         model_eval = ModelEvaluation(data_validation_artifact=data_validation_artifact,
-    #                                     model_trainer_artifact=model_trainer_artifact,
-    #                                     model_eval_config=model_eval_config
-    #                                     )
-    #         return model_eval.initiate_model_evaluation()
-    #     except Exception as e:
-    #         raise CreditRiskException(e, sys)
+    def start_model_evaluation(self, data_validation_artifact, model_trainer_artifact) -> ModelEvaluationArtifact:
+        try:
+            model_eval_config = ModelEvaluationConfig(training_pipeline_config=self.training_pipeline_config)
+            model_eval = ModelEvaluation(data_validation_artifact=data_validation_artifact,
+                                        model_trainer_artifact=model_trainer_artifact,
+                                        model_eval_config=model_eval_config
+                                        )
+            return model_eval.initiate_model_evaluation()
+        except Exception as e:
+            raise CreditRiskException(e, sys)
     
-    # def start_model_pusher(self, model_trainer_artifact: ModelTrainerArtifact):
-    #     try:
+    def start_model_pusher(self, model_trainer_artifact: ModelTrainerArtifact):
+        try:
 
-    #         model_pusher_config = ModelPusherConfig(training_pipeline_config=self.training_pipeline_config)
-    #         model_pusher = ModelPusher(model_trainer_artifact=model_trainer_artifact,
-    #                                    model_pusher_config=model_pusher_config
-    #                                    )
-    #         return model_pusher.initiate_model_pusher()
-    #     except Exception as e:
-    #         raise CreditRiskException(e, sys)
+            model_pusher_config = ModelPusherConfig(training_pipeline_config=self.training_pipeline_config)
+            model_pusher = ModelPusher(model_trainer_artifact=model_trainer_artifact,
+                                       model_pusher_config=model_pusher_config
+                                       )
+            return model_pusher.initiate_model_pusher()
+        except Exception as e:
+            raise CreditRiskException(e, sys)
 
         
 
@@ -96,10 +96,10 @@ class TrainingPipeline:
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(data_validation_artifact=data_validation_artifact)
             model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
-            # model_eval_artifact = self.start_model_evaluation(data_validation_artifact=data_validation_artifact,
-            #                                                   model_trainer_artifact=model_trainer_artifact
-            #                                                   )
-            # if model_eval_artifact.model_accepted:
-            #     self.start_model_pusher(model_trainer_artifact=model_trainer_artifact)
+            model_eval_artifact = self.start_model_evaluation(data_validation_artifact=data_validation_artifact,
+                                                              model_trainer_artifact=model_trainer_artifact
+                                                              )
+            if model_eval_artifact.model_accepted:
+                self.start_model_pusher(model_trainer_artifact=model_trainer_artifact)
         except Exception as e:
             raise CreditRiskException(e, sys)

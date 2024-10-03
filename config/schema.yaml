@@ -1,0 +1,48 @@
+columns:
+  originalTitle: category
+  distributor: category
+  opening_theaters: float
+  budget: float
+  MPAA: category
+  release_days: float
+  startYear: float
+  runtimeMinutes: float
+  genres_y: category
+  averageRating: float
+  numVotes: float
+  ordering: float
+  category: category
+  primaryName: category
+  world_revenue: float
+
+
+categorical_columns:
+  - originalTitle
+  - distributor
+  - MPAA
+  - genres_y
+  - category
+  - primaryName
+
+numerical_columns:
+  - opening_theaters
+  - budget
+  - release_days
+  - startYear
+  - runtimeMinutes
+  - averageRating
+  - numVotes
+  - ordering
+ 
+
+
+target_column: world_revenue
+#data range check
+domain_value:
+  MPAA:
+   -PG-13,
+   -R,
+   -Not Rated,
+   -G,
+   -PG,
+  

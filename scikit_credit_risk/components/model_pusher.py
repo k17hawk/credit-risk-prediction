@@ -1,12 +1,12 @@
-from credit_risk.exception import CreditRiskException
+from scikit_credit_risk.exception import CreditRiskException
 import sys
-from credit_risk.logger import logging as  logger
-from credit_risk.entity.config_entity import ModelPusherConfig
-from credit_risk.entity.artifact_entity import ModelPusherArtifact, ModelTrainerArtifact
-from credit_risk.ml.esitmator import ModelResolver
-from pyspark.ml.pipeline import PipelineModel
+from scikit_credit_risk.logger import logging as  logger
+from scikit_credit_risk.entity.config_entity import ModelPusherConfig
+from scikit_credit_risk.entity.artifact_entity import ModelPusherArtifact, ModelTrainerArtifact
+from scikit_credit_risk.ml.esitmator import ModelResolver
+from scikit_credit_risk.utils import load_object,save_object
 import os
-from credit_risk.data_access.model_pusher_artifact import ModelPusherArtifactData
+from scikit_credit_risk.data_access.model_pusher_artifact import ModelPusherArtifactData
 
 
 class ModelPusher:
@@ -21,9 +21,9 @@ class ModelPusher:
         try:
             trained_model_path=self.model_trainer_artifact.model_trainer_ref_artifact.trained_model_file_path
             saved_model_path = self.model_resolver.get_save_model_path
-            model = PipelineModel.load(trained_model_path)
-            model.save(saved_model_path)
-            model.save(self.model_pusher_config.pusher_model_dir)
+            model = load_object(trained_model_path)
+            save_object(saved_model_path,obj=model)
+            
             return saved_model_path
         except Exception as e:
             raise CreditRiskException(e, sys)
