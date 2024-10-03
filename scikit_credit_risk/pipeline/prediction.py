@@ -6,7 +6,7 @@ from scikit_credit_risk.entity.schema import CreditRiskDataSchema
 import os,sys
 from scikit_credit_risk.entity.config_entity import BatchPredictionConfig
 from scikit_credit_risk.constant import TIMESTAMP
-from pyspark.sql import DataFrame
+import pandas as pd
 from datetime import datetime
 import pandas as pd
 class Prediction:
@@ -30,7 +30,7 @@ class Prediction:
                 if file_name.endswith('.csv'):
                     # Reading CSV file
                     print(f"Reading CSV file: {data_file_path}")
-                    df: DataFrame = pd.read_csv(data_file_path, header=1, skiprows=[0])
+                    df: pd.DataFrame = pd.read_csv(data_file_path, header=1, skiprows=[0])
         
                     df = df.dropna()
 
@@ -43,7 +43,7 @@ class Prediction:
         except Exception as e:
             print(f"Error occurred: {e}")
             
-    def is_required_columns_exist(self, dataframe: DataFrame):
+    def is_required_columns_exist(self, dataframe: pd.DataFrame):
         try:
             columns = list(filter(lambda x: x in self.schema.required_columns_prediction,
                                     dataframe.columns))
@@ -52,7 +52,7 @@ class Prediction:
         except Exception as e:
             raise CreditRiskException(e, sys)
     
-    def drop_vector_columns(self,df: DataFrame) -> DataFrame:
+    def drop_vector_columns(self,df: pd.DataFrame) -> pd.DataFrame:
 
         vector_columns = [col for col in df.columns if df.schema[col].dataType.typeName() == 'vector']
         double_columns = [col for col in df.columns if df.schema[col].dataType.typeName()=='double']
@@ -66,7 +66,7 @@ class Prediction:
     def convert_parquet_to_csv(self,parquet_file_path: str, csv_file_path: str):
         try:
     
-            df = spark_session.read.parquet(parquet_file_path)
+            df = pd.read_parquet(parquet_file_path,engine='pyarrow')
   
             df = self.drop_vector_columns(df)
 

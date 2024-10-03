@@ -88,7 +88,7 @@ class CreditRiskEstimator:
             #     dataframe = stage.transform(dataframe)
             #     dataframe.printSchema()
             #     print("successful",stage)  
-            transformed_df = model.transform(dataframe)
+            transformed_df = model.predict(dataframe)
         
 
             # Log the output DataFrame schema
