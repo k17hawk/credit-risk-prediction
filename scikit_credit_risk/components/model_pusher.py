@@ -1,41 +1,63 @@
-from scikit_credit_risk.exception import CreditRiskException
-import sys
-from scikit_credit_risk.logger import logging as  logger
+"""
+author @ kumar dahaltest_precision
+this code is written to push the model in the cloud
+"""
+
+from scikit_credit_risk import logging
+from scikit_credit_risk.exception import CreditException
+from scikit_credit_risk.entity.artifact_entity import ModelPusherArtifact, ModelEvaluationArtifact 
 from scikit_credit_risk.entity.config_entity import ModelPusherConfig
-from scikit_credit_risk.entity.artifact_entity import ModelPusherArtifact, ModelTrainerArtifact
-from scikit_credit_risk.ml.esitmator import ModelResolver
-from scikit_credit_risk.utils import load_object,save_object
-import os
-from scikit_credit_risk.data_access.model_pusher_artifact import ModelPusherArtifactData
+import os, sys
+import shutil
 
 
 class ModelPusher:
-    def __init__(self, model_trainer_artifact: ModelTrainerArtifact, model_pusher_config: ModelPusherConfig):
-        logger.info(f"{'>>' * 20}Starting Model pusher.{'<<' * 20}")
-        self.model_trainer_artifact = model_trainer_artifact
-        self.model_pusher_artifact_data = ModelPusherArtifactData()
-        self.model_pusher_config = model_pusher_config
-        self.model_resolver = ModelResolver(model_dir=self.model_pusher_config.saved_model_dir)
 
-    def push_model(self) -> str:
+    def __init__(self, model_pusher_config: ModelPusherConfig,
+                 model_evaluation_artifact: ModelEvaluationArtifact
+                 ):
         try:
-            trained_model_path=self.model_trainer_artifact.model_trainer_ref_artifact.trained_model_file_path
-            saved_model_path = self.model_resolver.get_save_model_path
-            model = load_object(trained_model_path)
-            save_object(saved_model_path,obj=model)
-            
-            return saved_model_path
+            logging.info(f"{'>>' * 30}Model Pusher log started.{'<<' * 30} ")
+            self.model_pusher_config = model_pusher_config
+            self.model_evaluation_artifact = model_evaluation_artifact
+
         except Exception as e:
-            raise CreditRiskException(e, sys)
+            raise CreditException(e, sys) from e
+
+    def export_model(self) -> ModelPusherArtifact:
+        try:
+            #get the model path or trained or old model from artifact
+            evaluated_model_file_path = self.model_evaluation_artifact.evaluated_model_path
+
+            #directory to export model
+            export_dir = self.model_pusher_config.export_dir_path
+            #get the file name from evaluated_model_file_path
+            model_file_name = os.path.basename(evaluated_model_file_path)
+            #create the directory to copy the model 
+            export_model_file_path = os.path.join(export_dir, model_file_name)
+            logging.info(f"Exporting model file: [{export_model_file_path}]")
+            os.makedirs(export_dir, exist_ok=True)
+
+            #copy from source to destination
+            shutil.copy(src=evaluated_model_file_path, dst=export_model_file_path)
+            #we can call a function to save model in cloud from here create the save_models folder in cloud
+            
+            logging.info(
+                f"Trained model: {evaluated_model_file_path} is copied in export dir:[{export_model_file_path}]")
+
+            model_pusher_artifact = ModelPusherArtifact(is_model_pusher=True,
+                                                        export_model_file_path=export_model_file_path
+                                                        )
+            logging.info(f"Model pusher artifact: [{model_pusher_artifact}]")
+            return model_pusher_artifact
+        except Exception as e:
+            raise CreditException(e, sys) from e
 
     def initiate_model_pusher(self) -> ModelPusherArtifact:
         try:
-            saved_model_path = self.push_model()
-            model_pusher_artifact = ModelPusherArtifact(model_pushed_dir=self.model_pusher_config.pusher_model_dir,
-                                    saved_model_dir=saved_model_path)
-            logger.info(f"Model pusher artifact: {model_pusher_artifact}")
-            self.model_pusher_artifact_data.save_pusher_artifact(model_pusher_artifact = model_pusher_artifact)
-            logger.info(f"{'>>' * 20} Model pusher completed.{'<<' * 20}")
-            return model_pusher_artifact
+            return self.export_model()
         except Exception as e:
-            raise CreditRiskException(e, sys)
+            raise CreditException(e, sys) from e
+
+    def __del__(self):
+        logging.info(f"{'>>' * 20}Model Pusher log completed.{'<<' * 20} ")

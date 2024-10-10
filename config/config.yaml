@@ -1,10 +1,10 @@
 training_pipeline_config:
-  pipeline_name: movies
-  artifact_dir: artifact
+  pipeline_name: credit
+  artifact_dir: credit_artifact
 
 
 data_ingestion_config:
-  dataset_download_url: f"https://raw.githubusercontent.com/k17hawk/credit-risk-prediction/main/Data/credit_risk_dataset.csv"
+  dataset_download_url: https://raw.githubusercontent.com/k17hawk/credit-risk-prediction/main/Data/credit_risk_dataset.csv
   raw_data_dir: raw_data
   tgz_download_dir: tgz_data
   ingested_dir: ingested_data
@@ -19,7 +19,12 @@ data_validation_config:
   report_page_file_name: report.html
 
 data_transformation_config:
-  add_bedroom_per_room: true
+  loan_to_income_ratio: loan_to_income_ratio
+  loan_to_emp_length_ratio: loan_to_emp_length_ratio
+  int_rate_to_loan_amt_ratio: int_rate_to_loan_amt_ratio
+  income_group: income_group
+  age_group: age_group
+  loan_amount_group: loan_amount_group
   transformed_dir: transformed_data
   transformed_train_dir: train
   transformed_test_dir: test
@@ -38,4 +43,4 @@ model_evaluation_config:
   
 
 model_pusher_config:
-  model_export_dir: saved_models
+  model_export_dir: saved_models_scikit

@@ -30,3 +30,4 @@ streamlit
 pandasai
 langgraph
 langchain-experimental
+ipython

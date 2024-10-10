@@ -1,48 +1,38 @@
 columns:
-  originalTitle: category
-  distributor: category
-  opening_theaters: float
-  budget: float
-  MPAA: category
-  release_days: float
-  startYear: float
-  runtimeMinutes: float
-  genres_y: category
-  averageRating: float
-  numVotes: float
-  ordering: float
-  category: category
-  primaryName: category
-  world_revenue: float
+    person_age: float
+    person_income: float
+    person_emp_length: float
+    loan_amnt: float
+    loan_int_rate: float
+    loan_status: category
+    loan_percent_income: float
+    cb_person_cred_hist_length: float
+    person_home_ownership: category
+    loan_intent: category
+    loan_grade: category
+    cb_person_default_on_file: category
+
+
 
 
 categorical_columns:
-  - originalTitle
-  - distributor
-  - MPAA
-  - genres_y
-  - category
-  - primaryName
+  - loan_intent
+  - loan_grade
+  - cb_person_default_on_file
+  - person_home_ownership
+  - income_group
+  - age_group
+  - loan_amount_group
 
 numerical_columns:
-  - opening_theaters
-  - budget
-  - release_days
-  - startYear
-  - runtimeMinutes
-  - averageRating
-  - numVotes
-  - ordering
- 
+   - person_age
+   - person_income
+   - person_emp_length
+   - loan_int_rate
+   - loan_percent_income
+   - cb_person_cred_hist_length
+   - loan_to_income_ratio
+   - loan_to_emp_length_ratio
+   - int_rate_to_loan_amt_ratio
 
-
-target_column: world_revenue
-#data range check
-domain_value:
-  MPAA:
-   -PG-13,
-   -R,
-   -Not Rated,
-   -G,
-   -PG,
-  
+target_column: loan_status

@@ -1,0 +1,23 @@
+random_search:
+  class: RandomizedSearchCV
+  module: sklearn.model_selection  
+  params:
+    cv: 5
+    n_iter: 10
+    verbose: 2
+    
+model_selection:
+  module_0:
+    class: LogisticRegression
+    module: sklearn.linear_model
+    params:
+      fit_intercept: true
+      penalty: l2  
+      max_iter: 50
+      search_param_random:
+        fit_intercept:
+          - true  
+          - false  
+        penalty:
+          - l1
+          - l2

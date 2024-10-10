@@ -1,114 +1,31 @@
-from dataclasses import dataclass,asdict
-from datetime import datetime
+"""
+author @ kumar dahal
 
+this artifact is written for the output storing
+"""
 
-@dataclass
-class DataIngestionArtifact:
-    download_dir:str
-    feature_store_file_path:str
-
-    def to_dict(self):
-        return asdict(self)
-
-    def __str__(self):
-        return str(self.to_dict())
-    
-
-@dataclass
-class DataValidationArtifact:
-    accepted_file_path:str
-    rejected_dir:str
-
-    def to_dict(self):
-        return asdict(self)
-
-    def __str__(self):
-        return str(self.to_dict())
-    
-
-@dataclass
-class DataTransformationArtifact:
-    transformed_train_file_path:str
-    exported_pipeline_file_path:str
-    transformed_test_file_path:str
-
-    def to_dict(self):
-        return asdict(self)
-
-    def __str__(self):
-        return str(self.to_dict())
-
-
-@dataclass
-class PartialModelTrainerMetricArtifact:
-    f1_score: float
-    precision_score: float
-    recall_score: float
-
-    def to_dict(self):
-        return self.__dict__
-
-@dataclass
-class PartialModelTrainerRefArtifact:
-    trained_model_file_path: str
-    
-    def to_dict(self):
-        return self.__dict__
-
-
-class ModelTrainerArtifact:
-    def __init__(self, model_trainer_ref_artifact: PartialModelTrainerRefArtifact,
-                 model_trainer_train_metric_artifact: PartialModelTrainerMetricArtifact,
-                 model_trainer_test_metric_artifact: PartialModelTrainerMetricArtifact):
-        self.model_trainer_ref_artifact = model_trainer_ref_artifact
-        self.model_trainer_train_metric_artifact = model_trainer_train_metric_artifact
-        self.model_trainer_test_metric_artifact = model_trainer_test_metric_artifact
-
-    @staticmethod
-    def construct_object(**kwargs):
-        model_trainer_ref_artifact = PartialModelTrainerRefArtifact(**(kwargs['model_trainer_ref_artifact']))
-        model_trainer_train_metric_artifact = PartialModelTrainerMetricArtifact(**(kwargs['model_trainer_train_metric_artifact']))
-        model_trainer_test_metric_artifact = PartialModelTrainerMetricArtifact(**(kwargs['model_trainer_test_metric_artifact']))
-        model_trainer_artifact = ModelTrainerArtifact(model_trainer_ref_artifact, model_trainer_train_metric_artifact, model_trainer_test_metric_artifact)
-        return model_trainer_artifact
-
-    def to_dict(self):
-        return {
-            "model_trainer_ref_artifact": self.model_trainer_ref_artifact.to_dict(),
-            "model_trainer_train_metric_artifact": self.model_trainer_train_metric_artifact.to_dict(),
-            "model_trainer_test_metric_artifact": self.model_trainer_test_metric_artifact.to_dict()
-        }
-
-    def __str__(self):
-        return str(self.to_dict())
+from collections import namedtuple
 
 
 
-class ModelEvaluationArtifact:
+DataIngestionArtifact = namedtuple("DataIngestionArtifact",
+[ "train_file_path", "test_file_path", "is_ingested", "message"])
 
-    def __init__(self, model_accepted, changed_accuracy, trained_model_path, best_model_path, active,*args,**kwargs):
-        self.model_accepted = model_accepted
-        self.changed_accuracy = changed_accuracy
-        self.trained_model_path = trained_model_path
-        self.best_model_path = best_model_path
-        self.active = active
-        self.created_timestamp = datetime.now()
 
-    def to_dict(self):
-        return  self.__dict__
-        
+DataValidationArtifact = namedtuple("DataValidationArtifact",
+["schema_file_path","report_file_path","report_page_file_path","is_validated","message"])
 
-    def __str__(self):
-        return str(self.to_dict())
 
-@dataclass
-class ModelPusherArtifact:
-    model_pushed_dir:str
-    saved_model_dir:str
+DataTransformationArtifact = namedtuple("DataTransformationArtifact",
+ ["is_transformed", "message", "transformed_train_file_path","transformed_test_file_path",
+     "preprocessed_object_file_path"])
 
-    def to_dict(self):
-        return  self.__dict__
-        
+#ModelTrainerArtifact = namedtuple("ModelTrainerArtifact", ["is_trained", "message", "trained_model_file_path"])
+ModelTrainerArtifact = namedtuple("ModelTrainerArtifact", ["is_trained", "message", "trained_model_file_path",
+                                                           "test_recall", "test_precision", "train_accuracy", "test_accuracy",
+                                                           "model_accuracy"])
 
-    def __str__(self):
-        return str(self.to_dict())
+ModelEvaluationArtifact = namedtuple("ModelEvaluationArtifact", ["is_model_accepted", "evaluated_model_path"])
+
+ModelPusherArtifact = namedtuple("ModelPusherArtifact", ["is_model_pusher", "export_model_file_path"])
+
