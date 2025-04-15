@@ -158,8 +158,7 @@ class Prediction:
         
             archive_file_path = os.path.join(self.batch_config.archive_dir, f"{os.path.splitext(latest_file)[0]}_archived_{TIMESTAMP}.parquet")
             df.write.parquet(archive_file_path)
-                
-            print("prediction completed..Kumar, You are god! your Bhanja is  Bad Boy, he is AmongUS player , he only play with Orangee..")
+            
                 
         except Exception as e:
             raise CreditRiskException(e, sys)
